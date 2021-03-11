@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/icon.png?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="概论Android的消息机制由Handler，MessageQueue与Looper支撑，Handler是消息机制的上层接口，在开发过程中主要与Handler打交道。MessageQueue为消息队列，它在内部存储了一组消息，以队列的形式对外提供插入与删除的工作（内部存储采用单链表的数据结构）。Looper的中文翻译为循环，它以无限循环的方式去查找MessageQueue中是否有消息，如果有就处">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android消息机制">
+<meta property="og:url" content="http://example.com/2017/01/07/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="TL">
+<meta property="og:description" content="概论Android的消息机制由Handler，MessageQueue与Looper支撑，Handler是消息机制的上层接口，在开发过程中主要与Handler打交道。MessageQueue为消息队列，它在内部存储了一组消息，以队列的形式对外提供插入与删除的工作（内部存储采用单链表的数据结构）。Looper的中文翻译为循环，它以无限循环的方式去查找MessageQueue中是否有消息，如果有就处">
+<meta property="og:locale">
+<meta property="article:published_time" content="2017-01-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2017-10-30T08:59:02.681Z">
+<meta property="article:author" content="無恙">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://example.com/2017/01/07/Android消息机制/"/>
+
+
+
+
+
+  <title>Android消息机制 | TL</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TL</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">不算纯粹,但愿优雅</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2017/01/07/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/%E5%A4%B4%E5%83%8F.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TL">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android消息机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-07T00:00:00+08:00">
+                2017-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,939
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  15
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<h1 id="概论"><a href="#概论" class="headerlink" title="概论"></a>概论</h1><p>Android的消息机制由Handler，MessageQueue与Looper支撑，Handler是消息机制的上层接口，在开发过程中主要与Handler打交道。<br>MessageQueue为消息队列，它在内部存储了一组消息，以队列的形式对外提供插入与删除的工作（内部存储采用单链表的数据结构）。<br>Looper的中文翻译为循环，它以无限循环的方式去查找MessageQueue中是否有消息，如果有就处理消息，否则一直等待。<br>Handler在创建的时候会采用当前线程的Looper构建消息循环系统，而Looper使用ThreadLocal（一个线程内部的数据存储类，可以在不同线程中互不干扰地存储并提供数据）使得每个线程都有一个Looper。<br>不过线程默认没有Looper（ui线程除外），如果需要使用Handler就必须为线程创建Looper。UI线程就是ActivityThread，它会在创建的时候初始化Looper。</p>
+<a id="more"></a> 
+<h2 id="UI不能在子线程中访问的原因"><a href="#UI不能在子线程中访问的原因" class="headerlink" title="UI不能在子线程中访问的原因"></a>UI不能在子线程中访问的原因</h2><p>Handler并不是专门用于更新UI的，但很多时候它都被开发者用来更新UI，那为什么必须在主线程中才能操作UI呢？主要是因为Android的UI控件不是线程安全的，如果在多线程并发访问会导致UI控件出现不可预料到结果。那为什么不能加锁呢？首先是加锁会让UI访问得逻辑变得复杂，然后也会降低UI访问的效率，因为锁机制会阻塞一些线程的执行。所以最简单高效的方法就是采用单线程模型来处理UI操作。</p>
+<h1 id="Message与MessageQueue工作原理"><a href="#Message与MessageQueue工作原理" class="headerlink" title="Message与MessageQueue工作原理"></a>Message与MessageQueue工作原理</h1><p>对于Android消息机制我们从最熟悉的Message开始，Message用于存储传递的数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* arg1 and arg2 are lower-cost alternatives to using﻿</span></span><br><span class="line"><span class="comment">* &#123;<span class="doctag">@link</span> #setData(Bundle) setData()&#125; if *you only need to store a﻿ few integer *values.﻿</span></span><br><span class="line"><span class="comment">*arg1和arg2是低成本数据的选择方案</span></span><br><span class="line"><span class="comment">*如果只要存储一些integer只用选择它*们，不必使用setData();</span></span><br><span class="line"><span class="comment">    */</span>﻿</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">int</span> arg1;﻿﻿</span><br><span class="line">   <span class="comment">/**﻿</span></span><br><span class="line"><span class="comment">    * arg1 and arg2 are lower-cost alternatives to using﻿</span></span><br><span class="line"><span class="comment">    * &#123;<span class="doctag">@link</span> #setData(Bundle) setData()&#125; if you only need to store a﻿</span></span><br><span class="line"><span class="comment">    * few integer values.﻿</span></span><br><span class="line"><span class="comment">    */</span>﻿</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">int</span> arg2;</span><br><span class="line">   </span><br><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">   User-defined message code so that the recipient can identify what this message is about. Each Handler has its own name-space for message codes, so you do not need to worry about yours conflicting with other handlers.</span></span><br><span class="line"><span class="comment">   </span></span><br><span class="line"><span class="comment">用户自定义的消息代码，这样接受者可以确定这个消息的信息。每个handler各自包含自己的消息代码，所以不用担心自定义的消息跟其他handlers有冲突。</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">int</span> what</span><br><span class="line">   </span><br><span class="line">   <span class="comment">//...</span></span><br><span class="line">   <span class="keyword">public</span> Object obj</span><br></pre></td></tr></table></figure>
+<p>创建Message不必使用它的构造方法，使用obtain();可以从Message池中取出一个Message,避免多次创建新的Message对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">* Return a <span class="keyword">new</span> Message instance from the global pool. Allows us to﻿</span><br><span class="line">    * avoid allocating <span class="keyword">new</span> objects in many cases.﻿</span><br><span class="line">    */﻿</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Message <span class="title">obtain</span><span class="params">()</span> </span>&#123;﻿</span><br><span class="line">       <span class="keyword">synchronized</span> (sPoolSync) &#123;﻿</span><br><span class="line">           <span class="keyword">if</span> (sPool != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">               Message m = sPool;﻿</span><br><span class="line">               sPool = m.next;﻿</span><br><span class="line">               m.next = <span class="keyword">null</span>;﻿</span><br><span class="line">               m.flags = <span class="number">0</span>; <span class="comment">// clear in-use flag﻿</span></span><br><span class="line">               sPoolSize--;﻿</span><br><span class="line">               <span class="keyword">return</span> m;﻿</span><br><span class="line">           &#125;﻿</span><br><span class="line">       &#125;﻿</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> Message();﻿</span><br><span class="line">   &#125;﻿﻿</span><br><span class="line">   <span class="comment">/**﻿</span></span><br><span class="line"><span class="comment">    * Same as &#123;<span class="doctag">@link</span> #obtain()&#125;, but copies the values of an existing﻿</span></span><br><span class="line"><span class="comment">    * message (including its target) into the new one.﻿</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> orig Original message to copy.﻿</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@return</span> A Message object from the global pool.﻿</span></span><br><span class="line"><span class="comment">    */</span>﻿</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Message <span class="title">obtain</span><span class="params">(Message orig)</span> </span>&#123;﻿</span><br><span class="line">       Message m = obtain();﻿</span><br><span class="line">       m.what = orig.what;﻿</span><br><span class="line">       m.arg1 = orig.arg1;﻿</span><br><span class="line">       m.arg2 = orig.arg2;﻿</span><br><span class="line">       m.obj = orig.obj;﻿</span><br><span class="line">       m.replyTo = orig.replyTo;﻿</span><br><span class="line">       m.sendingUid = orig.sendingUid;﻿</span><br><span class="line">       <span class="keyword">if</span> (orig.data != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">           m.data = <span class="keyword">new</span> Bundle(orig.data);﻿</span><br><span class="line">       &#125;﻿</span><br><span class="line">       m.target = orig.target;﻿</span><br><span class="line">       m.callback = orig.callback;﻿﻿</span><br><span class="line">       <span class="keyword">return</span> m;﻿</span><br><span class="line">   &#125;﻿﻿</span><br><span class="line">   <span class="comment">/**﻿</span></span><br><span class="line"><span class="comment">    * Same as &#123;<span class="doctag">@link</span> #obtain()&#125;, but sets the value for the target member on the Message returned.﻿</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> h  Handler to assign to the returned Message object&#x27;s target member.﻿</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@return</span> A Message object from the global pool.﻿</span></span><br><span class="line"><span class="comment">    */</span>﻿</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Message <span class="title">obtain</span><span class="params">(Handler h)</span> </span>&#123;﻿</span><br><span class="line">       Message m = obtain();﻿</span><br><span class="line">       m.target = h;﻿﻿</span><br><span class="line">       <span class="keyword">return</span> m;﻿</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>接下来看下常用的sendMessage()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">sendMessage</span><span class="params">(Message msg)</span>﻿</span>&#123;﻿</span><br><span class="line"><span class="keyword">return</span> sendMessageDelayed(msg, <span class="number">0</span>);﻿</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">sendEmptyMessageDelayed</span><span class="params">(<span class="keyword">int</span> what, <span class="keyword">long</span> delayMillis)</span> </span>&#123;﻿</span><br><span class="line">       Message msg = Message.obtain();﻿</span><br><span class="line">       msg.what = what;﻿</span><br><span class="line">       <span class="keyword">return</span> sendMessageDelayed(msg, delayMillis);﻿</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>都调用到sendMessageDelayed</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">sendMessageDelayed</span><span class="params">(Message msg, <span class="keyword">long</span> delayMillis)</span>﻿</span></span><br><span class="line"><span class="function">  </span>&#123;﻿</span><br><span class="line">      <span class="keyword">if</span> (delayMillis &lt; <span class="number">0</span>) &#123;﻿</span><br><span class="line">          delayMillis = <span class="number">0</span>;﻿</span><br><span class="line">      &#125;﻿</span><br><span class="line">      <span class="keyword">return</span> sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);﻿</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">sendMessageAtTime</span><span class="params">(Message msg, <span class="keyword">long</span> uptimeMillis)</span> </span>&#123;﻿</span><br><span class="line">       MessageQueue queue = mQueue;﻿</span><br><span class="line">       <span class="keyword">if</span> (queue == <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">           RuntimeException e = <span class="keyword">new</span> RuntimeException(﻿</span><br><span class="line">                   <span class="keyword">this</span> + <span class="string">&quot; sendMessageAtTime() called with no mQueue&quot;</span>);﻿</span><br><span class="line">           Log.w(<span class="string">&quot;Looper&quot;</span>, e.getMessage(), e);﻿</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">false</span>;﻿</span><br><span class="line">       &#125;﻿</span><br><span class="line">       <span class="keyword">return</span> enqueueMessage(queue, msg, uptimeMillis);﻿&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">enqueueMessage</span><span class="params">(MessageQueue queue, Message msg, <span class="keyword">long</span> uptimeMillis)</span> </span>&#123;﻿</span><br><span class="line">       msg.target = <span class="keyword">this</span>;﻿</span><br><span class="line">       <span class="keyword">if</span> (mAsynchronous) &#123;﻿</span><br><span class="line">           msg.setAsynchronous(<span class="keyword">true</span>);﻿</span><br><span class="line">       &#125;﻿</span><br><span class="line">       <span class="keyword">return</span> queue.enqueueMessage(msg, uptimeMillis);﻿</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>这里就给target赋值为this,就是上面说的target就是Handler了，所以最终会调用queue的enqueueMessage的方法，这就是MessageQueue的插入了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">enqueueMessage</span><span class="params">(Message msg, <span class="keyword">long</span> when)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (msg.target == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;Message must have a target.&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (msg.isInUse()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(msg + <span class="string">&quot; This message is already in use.&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mQuitting) &#123;</span><br><span class="line">                IllegalStateException e = <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                        msg.target + <span class="string">&quot; sending message to a Handler on a dead thread&quot;</span>);</span><br><span class="line">                Log.w(TAG, e.getMessage(), e);</span><br><span class="line">                msg.recycle();</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            msg.markInUse();</span><br><span class="line">            msg.when = when;</span><br><span class="line">            Message p = mMessages;</span><br><span class="line">            <span class="keyword">boolean</span> needWake;</span><br><span class="line">            <span class="keyword">if</span> (p == <span class="keyword">null</span> || when == <span class="number">0</span> || when &lt; p.when) &#123;</span><br><span class="line">                <span class="comment">// New head, wake up the event queue if blocked.</span></span><br><span class="line">                msg.next = p;</span><br><span class="line">                mMessages = msg;</span><br><span class="line">                needWake = mBlocked;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// Inserted within the middle of the queue.  Usually we don&#x27;t have to wake</span></span><br><span class="line">                <span class="comment">// up the event queue unless there is a barrier at the head of the queue</span></span><br><span class="line">                <span class="comment">// and the message is the earliest asynchronous message in the queue.</span></span><br><span class="line">                needWake = mBlocked &amp;&amp; p.target == <span class="keyword">null</span> &amp;&amp; msg.isAsynchronous();</span><br><span class="line">                Message prev;</span><br><span class="line">                <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                    prev = p;</span><br><span class="line">                    p = p.next;</span><br><span class="line">                    <span class="keyword">if</span> (p == <span class="keyword">null</span> || when &lt; p.when) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (needWake &amp;&amp; p.isAsynchronous()) &#123;</span><br><span class="line">                        needWake = <span class="keyword">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                msg.next = p; <span class="comment">// invariant: p == prev.next</span></span><br><span class="line">                prev.next = msg;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// We can assume mPtr != 0 because mQuitting is false.</span></span><br><span class="line">            <span class="keyword">if</span> (needWake) &#123;</span><br><span class="line">                nativeWake(mPtr);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>enqueueMessage的实现中可以看出，它的主要操作就是单链表的插入操作。</p>
+<p>在MessageQueue中还有一个重要方法：读取 next方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Message <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Return here if the message loop has already quit and been disposed.</span></span><br><span class="line">        <span class="comment">// This can happen if the application tries to restart a looper after quit</span></span><br><span class="line">        <span class="comment">// which is not supported.</span></span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">long</span> ptr = mPtr;</span><br><span class="line">        <span class="keyword">if</span> (ptr == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> pendingIdleHandlerCount = -<span class="number">1</span>; <span class="comment">// -1 only during first iteration</span></span><br><span class="line">        <span class="keyword">int</span> nextPollTimeoutMillis = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nextPollTimeoutMillis != <span class="number">0</span>) &#123;</span><br><span class="line">                Binder.flushPendingCommands();</span><br><span class="line">            &#125;</span><br><span class="line">            nativePollOnce(ptr, nextPollTimeoutMillis);</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                <span class="comment">// Try to retrieve the next message.  Return if found.</span></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">long</span> now = SystemClock.uptimeMillis();</span><br><span class="line">                Message prevMsg = <span class="keyword">null</span>;</span><br><span class="line">                Message msg = mMessages;</span><br><span class="line">                <span class="keyword">if</span> (msg != <span class="keyword">null</span> &amp;&amp; msg.target == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// Stalled by a barrier.  Find the next asynchronous message in the queue.</span></span><br><span class="line">                    <span class="keyword">do</span> &#123;</span><br><span class="line">                        prevMsg = msg;</span><br><span class="line">                        msg = msg.next;</span><br><span class="line">                    &#125; <span class="keyword">while</span> (msg != <span class="keyword">null</span> &amp;&amp; !msg.isAsynchronous());</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (msg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (now &lt; msg.when) &#123;</span><br><span class="line">                        <span class="comment">// Next message is not ready.  Set a timeout to wake up when it is ready.</span></span><br><span class="line">                        nextPollTimeoutMillis = (<span class="keyword">int</span>) Math.min(msg.when - now, Integer.MAX_VALUE);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="comment">// Got a message.</span></span><br><span class="line">                        mBlocked = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="keyword">if</span> (prevMsg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                            prevMsg.next = msg.next;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            mMessages = msg.next;</span><br><span class="line">                        &#125;</span><br><span class="line">                        msg.next = <span class="keyword">null</span>;</span><br><span class="line">                        <span class="keyword">if</span> (DEBUG) Log.v(TAG, <span class="string">&quot;Returning message: &quot;</span> + msg);</span><br><span class="line">                        msg.markInUse();</span><br><span class="line">                        <span class="keyword">return</span> msg;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// No more messages.</span></span><br><span class="line">                    nextPollTimeoutMillis = -<span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// Process the quit message now that all pending messages have been handled.</span></span><br><span class="line">                <span class="keyword">if</span> (mQuitting) &#123;</span><br><span class="line">                    dispose();</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// If first time idle, then get the number of idlers to run.</span></span><br><span class="line">                <span class="comment">// Idle handles only run if the queue is empty or if the first message</span></span><br><span class="line">                <span class="comment">// in the queue (possibly a barrier) is due to be handled in the future.</span></span><br><span class="line">                <span class="keyword">if</span> (pendingIdleHandlerCount &lt; <span class="number">0</span></span><br><span class="line">                        &amp;&amp; (mMessages == <span class="keyword">null</span> || now &lt; mMessages.when)) &#123;</span><br><span class="line">                    pendingIdleHandlerCount = mIdleHandlers.size();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (pendingIdleHandlerCount &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="comment">// No idle handlers to run.  Loop and wait some more.</span></span><br><span class="line">                    mBlocked = <span class="keyword">true</span>;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (mPendingIdleHandlers == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    mPendingIdleHandlers = <span class="keyword">new</span> IdleHandler[Math.max(pendingIdleHandlerCount, <span class="number">4</span>)];</span><br><span class="line">                &#125;</span><br><span class="line">                mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Run the idle handlers.</span></span><br><span class="line">            <span class="comment">// We only ever reach this code block during the first iteration.</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; pendingIdleHandlerCount; i++) &#123;</span><br><span class="line">                <span class="keyword">final</span> IdleHandler idler = mPendingIdleHandlers[i];</span><br><span class="line">                mPendingIdleHandlers[i] = <span class="keyword">null</span>; <span class="comment">// release the reference to the handler</span></span><br><span class="line">                <span class="keyword">boolean</span> keep = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    keep = idler.queueIdle();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">                    Log.wtf(TAG, <span class="string">&quot;IdleHandler threw exception&quot;</span>, t);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (!keep) &#123;</span><br><span class="line">                    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">                        mIdleHandlers.remove(idler);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Reset the idle handler count to 0 so we do not run them again.</span></span><br><span class="line">            pendingIdleHandlerCount = <span class="number">0</span>;</span><br><span class="line">            <span class="comment">// While calling an idle handler, a new message could have been delivered</span></span><br><span class="line">            <span class="comment">// so go back and look again for a pending message without waiting.</span></span><br><span class="line">            nextPollTimeoutMillis = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出next方法就是一个无限循环的方法，消息队列没有消息，next方法就一直阻塞在那里，当有消息的时候，next方法就会返回这条消息并将其从单链表中移除。</p>
+<h1 id="Looper工作原理"><a href="#Looper工作原理" class="headerlink" title="Looper工作原理"></a>Looper工作原理</h1><p>Looper在Android消息机制中扮演着消息循环的角色，具体来说就是以无限循环的方式去查找MessageQueue中是否有消息，如果有就处理消息，否则一直阻塞在那里。<br>我们知道，Handler工作需要Looper，没有Looper就会报错，那么，怎么创建Looper呢？其实就是通过Looper.prepare()就可以为当前线程创建一个Looper，接着通过Looper.loop()就可以开启消息循环了。<br>首先我们看一下它的构造方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span></span>&#123;</span><br><span class="line">   mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</span><br><span class="line">   mThread = Thread.currentThread();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在构造方法中它会创建一个MessageQueue即消息队列，然后将当前线程的对象保存起来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Initialize the current thread as a looper.﻿</span></span><br><span class="line"><span class="comment">   * This gives you a chance to create handlers that then reference﻿</span></span><br><span class="line"><span class="comment">   * this looper, before actually starting the loop. Be sure to call﻿</span></span><br><span class="line"><span class="comment">   * &#123;<span class="doctag">@link</span> #loop()&#125; after calling this method, and end it by calling﻿</span></span><br><span class="line"><span class="comment">   * &#123;<span class="doctag">@link</span> #quit()&#125;.﻿</span></span><br><span class="line"><span class="comment">   */</span>﻿</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;﻿</span><br><span class="line">     prepare(<span class="keyword">true</span>);﻿</span><br><span class="line"> &#125;﻿﻿</span><br><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;﻿</span><br><span class="line">     <span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Only one Looper may be created per thread&quot;</span>);﻿</span><br><span class="line">     &#125;﻿</span><br><span class="line">     sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));﻿</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>hreadLocal是一个ThreadLocal对象，可以在一个线程中存储变量。可以看到，将一个Looper的实例放入了ThreadLocal，并且11行判断了sThreadLocal是否为null，否则抛出异常。这也就说明了Looper.prepare()方法不能被调用两次，同时也保证了一个线程中只有一个Looper实例,接下来是loop()方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**﻿</span></span><br><span class="line"><span class="comment">  * Run the message queue in this thread. Be sure to call﻿</span></span><br><span class="line"><span class="comment">  * &#123;<span class="doctag">@link</span> #quit()&#125; to end the loop.﻿</span></span><br><span class="line"><span class="comment">  */</span>﻿</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;﻿</span><br><span class="line">     <span class="keyword">final</span> Looper me = myLooper();﻿</span><br><span class="line">     <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;No Looper; Looper.prepare() wasn&#x27;t called on this thread.&quot;</span>);﻿</span><br><span class="line">     &#125;﻿</span><br><span class="line">     <span class="keyword">final</span> MessageQueue queue = me.mQueue;﻿﻿</span><br><span class="line">     <span class="comment">// Make sure the identity of this thread is that of the local process,﻿</span></span><br><span class="line">     <span class="comment">// and keep track of what that identity token actually is.﻿</span></span><br><span class="line">     Binder.clearCallingIdentity();﻿</span><br><span class="line">     <span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();﻿﻿</span><br><span class="line">     <span class="keyword">for</span> (;;) &#123;﻿</span><br><span class="line">         Message msg = queue.next(); <span class="comment">// might block﻿</span></span><br><span class="line">         <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">             <span class="comment">// No message indicates that the message queue is quitting.﻿</span></span><br><span class="line">             <span class="keyword">return</span>;﻿</span><br><span class="line">         &#125;﻿﻿</span><br><span class="line">         <span class="comment">// This must be in a local variable, in case a UI event sets the logger﻿</span></span><br><span class="line">         Printer logging = me.mLogging;﻿</span><br><span class="line">         <span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">             logging.println(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt; Dispatching to &quot;</span> + msg.target + <span class="string">&quot; &quot;</span> +﻿</span><br><span class="line">                     msg.callback + <span class="string">&quot;: &quot;</span> + msg.what);﻿</span><br><span class="line">         &#125;﻿﻿</span><br><span class="line">         msg.target.dispatchMessage(msg);﻿﻿</span><br><span class="line">         <span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">             logging.println(<span class="string">&quot;&lt;&lt;&lt;&lt;&lt; Finished to &quot;</span> + msg.target + <span class="string">&quot; &quot;</span> + msg.callback);﻿</span><br><span class="line">         &#125;﻿﻿</span><br><span class="line">         <span class="comment">// Make sure that during the course of dispatching the﻿</span></span><br><span class="line">         <span class="comment">// identity of the thread wasn&#x27;t corrupted.﻿</span></span><br><span class="line">         <span class="keyword">final</span> <span class="keyword">long</span> newIdent = Binder.clearCallingIdentity();﻿</span><br><span class="line">         <span class="keyword">if</span> (ident != newIdent) &#123;﻿</span><br><span class="line">             Log.wtf(TAG, <span class="string">&quot;Thread identity changed from 0x&quot;</span>﻿</span><br><span class="line">                     + Long.toHexString(ident) + <span class="string">&quot; to 0x&quot;</span>﻿</span><br><span class="line">                     + Long.toHexString(newIdent) + <span class="string">&quot; while dispatching to &quot;</span>﻿</span><br><span class="line">                     + msg.target.getClass().getName() + <span class="string">&quot; &quot;</span>﻿</span><br><span class="line">                     + msg.callback + <span class="string">&quot; what=&quot;</span> + msg.what);﻿</span><br><span class="line">         &#125;﻿﻿</span><br><span class="line">         msg.recycleUnchecked();﻿</span><br><span class="line">     &#125;﻿</span><br><span class="line"> &#125;﻿﻿</span><br><span class="line"> <span class="comment">/**﻿</span></span><br><span class="line"><span class="comment">  * Return the Looper object associated with the current thread.  Returns﻿</span></span><br><span class="line"><span class="comment">  * null if the calling thread is not associated with a Looper.﻿</span></span><br><span class="line"><span class="comment">  */</span>﻿</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Looper <span class="title">myLooper</span><span class="params">()</span> </span>&#123;﻿</span><br><span class="line">     <span class="keyword">return</span> sThreadLocal.get();﻿</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>方法中直接获取了sThreadLocal存储的Looper实例，如果me为null则抛出异常，这就是说looper方法必须在prepare方法之后才运行。﻿然后拿到该looper实例中的mQueue，就进入了无限循环。﻿然后一直取出一条消息，直到没有消息则阻塞。子线程Looper用完建议终止（调用quit方法），否则loop方法会无限循环下去，子线程会一直处于等待的状态。</p>
+<p>获取消息后使用msg.target.dispatchMessage(msg);把消息交给msg的target的dispatchMessage方法去处理。Msg的target是什么呢？其实就是handler对象。但是这里不同的是，Handle的dispatchMessage方法是在创建Handle时所使用的Looper中执行的，这样就成功的完成了线程切换。</p>
+<h1 id="Handler原理"><a href="#Handler原理" class="headerlink" title="Handler原理"></a>Handler原理</h1><p>Handler的工作主要包括消息的发送和接受过程。消息发送可以通过post或者send的一系列方法来实现，post的一系列方法最终是通过send的一系列方法来实现的。处理消息最终会调用Handler的dispatchMessage方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**﻿</span></span><br><span class="line"><span class="comment"> * Handle system messages here.﻿</span></span><br><span class="line"><span class="comment"> */</span>﻿</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dispatchMessage</span><span class="params">(Message msg)</span> </span>&#123;﻿</span><br><span class="line">    <span class="keyword">if</span> (msg.callback != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">        handleCallback(msg);﻿</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;﻿</span><br><span class="line">        <span class="keyword">if</span> (mCallback != <span class="keyword">null</span>) &#123;﻿</span><br><span class="line">            <span class="keyword">if</span> (mCallback.handleMessage(msg)) &#123;﻿</span><br><span class="line">                <span class="keyword">return</span>;﻿</span><br><span class="line">            &#125;﻿</span><br><span class="line">        &#125;﻿</span><br><span class="line">        handleMessage(msg);﻿</span><br><span class="line">    &#125;﻿</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**﻿</span></span><br><span class="line"><span class="comment"> * Subclasses must implement this to receive messages.﻿</span></span><br><span class="line"><span class="comment"> */</span>﻿</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;﻿</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个就是个空方法，所以需要我们对它进行复写。于是乎，处理Message就交到我们手中了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    無恙
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2017/01/07/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/" title="Android消息机制">http://example.com/2017/01/07/Android%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/11/Activity%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%92%8C%E5%90%AF%E5%8A%A8%E6%A8%A1%E5%BC%8F/" rel="next" title="Activity的生命周期和启动模式">
+                <i class="fa fa-chevron-left"></i> Activity的生命周期和启动模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/06/Java%E6%B3%A8%E8%A7%A3-Annotation/" rel="prev" title="Java注解-Annotation">
+                Java注解-Annotation <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/%E5%A4%B4%E5%83%8F.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AutismTl" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://mail.qq.com/cgi-bin/frame_html?sid=_v_P-2kojZmdUmAA&r=1b3292865a4e3d2f42394e2bfc504d7a" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-globe"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">概论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#UI%E4%B8%8D%E8%83%BD%E5%9C%A8%E5%AD%90%E7%BA%BF%E7%A8%8B%E4%B8%AD%E8%AE%BF%E9%97%AE%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.1.</span> <span class="nav-text">UI不能在子线程中访问的原因</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Message%E4%B8%8EMessageQueue%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">Message与MessageQueue工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Looper%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Looper工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Handler%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">Handler原理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無恙</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
