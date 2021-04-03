@@ -93,20 +93,21 @@
 <meta property="og:site_name" content="無恙">
 <meta property="og:description" content="Unicode的前因后果计算机没法直接处理文本，它只和0 1数字打交道。为了在计算机里用数字表示文本，我们指定了一个从字符到数字的映射。这个映射就叫做编码（encoding）。 1967年，字符编码ASCII正式发布。ASCII 码是 7 位的，它将英文字母，数字 0-9 以及一些标点符号和控制字符映射为 0-127 这些整型。 英语用 128 个字符来编码完全是足够的，但是用来表示其他语言，1">
 <meta property="og:locale">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_1.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_2.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_3.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_4.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_5.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_6.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_7.png">
-<meta property="og:image" content="http://www.autism-tl.cn/.cn//unicode_image_8.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_2.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_3.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_4.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_5.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_6.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_7.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_8.png">
 <meta property="article:published_time" content="2019-08-20T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-04-03T13:01:56.671Z">
+<meta property="article:modified_time" content="2021-04-03T13:13:07.293Z">
 <meta property="article:author" content="TL">
 <meta property="article:tag" content="计算机基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://www.autism-tl.cn/.cn//unicode_image_1.png">
+<meta name="twitter:image" content="http://www.autism-tl.cn/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png">
 
 
 
@@ -397,13 +398,15 @@
 <p>各种各样不统一的编码方式成了系统开发者的噩梦，他们提出了一个<strong>“内码表”</strong>的概念，可以切换到相应语言的一个内码表，这样才能显示相应语言的字母。如果你在一台机器上写了一段文字，然后在另一台使用了不同的内码表的机器上打开就会显示出错误。在这种情况下，如果使用多语种，那么就需要频繁的在内码表内进行切换。</p>
 <p><strong>1987年</strong>，来自几个大的科技公司（其中包括苹果和 NeXT）的工程师们开始合作致力于开发一种能在全世界所有书写系统中通用的字符编码系统，于 1991 年 10 月发布的 1.0.0 版本的 Unicode 标准就是这一努力的成果。</p>
 <p><strong>Unicode</strong> 是一本很厚的字典，为世界上几乎所有的书写系统里所使用的每一个字符或符号定义了一个唯一的数字。这个数字叫做<strong>码点（code points）</strong>。最初，Unicode 编码是被设计为 16 位的，提供了 65,536 个字符的空间。后来考虑到要编码历史上的文字以及一些很少使用的日本汉字和<strong>中国汉字</strong>，Unicode 编码扩展到了 21 位（从 U+0000 到 U+<strong>10FFFF</strong>），这 21 位提供了 1,114,112 个码点，其中，只有大概 10% 正在使用，还有很大的扩充空间。</p>
-<p><img src="/.cn//unicode_image_1.png" alt="image-20210403204705833"></p>
+<img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png" class title="test">
+
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png" alt="image-20210403204705833"></p>
 <p>Unicode编码空间被分成 17(1+2^4)个<strong>平面</strong>，每个平面有 65,536 (2^16)个字符。0 号平面叫做<strong>「基本多文种平面」</strong>，涵盖了几乎所有你能遇到的字符，<strong>除了 emoji</strong>。其它平面叫做辅助平面，大多是空的。</p>
 <h2 id="Unicode编码解码"><a href="#Unicode编码解码" class="headerlink" title="Unicode编码解码"></a>Unicode编码解码</h2><p>Unicode的实现方式称为Unicode转换格式（Unicode Transformation Format，简称为UTF）。</p>
 <h3 id="UTF-8"><a href="#UTF-8" class="headerlink" title="UTF-8"></a>UTF-8</h3><p>UTF-8 是目前互联网上使用最广泛的一种 Unicode 编码方式，实现了对 ASCII 码的向后兼容。它的最大特点就是可变长，它可以使用 1 - 4 个字节表示一个字符，根据字符的不同变换长度。编码规则如下：</p>
 <p>1、对于单个字节的字符，第一位设为 0，后面的 7 位对应这个字符的 Unicode 码点。因此，对于英文中的 0 - 127 号字符，与 ASCII 码完全相同。意味着 ASCII 码用 UTF-8 编码兼容完全没有问题。</p>
 <p>2、对于需要使用 N 个字节来表示的字符（N &gt; 1），第一个字节的前 N 位都设为 1，第 N + 1 位设为0，剩余的 N - 1 个字节的前两位都设位 10，剩下的二进制位则使用这个字符的 Unicode 码点来填充。</p>
-<p><img src="/.cn//unicode_image_2.png" alt="image-20210403204705833"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_2.png" alt="image-20210403204705833"></p>
 <p>“汉”的 Unicode 码点是 0x6c49（110 1100 0100 1001），0x6c49 需要15位二进制位数，那么得出其格式为 1110xxxx 10xxxxxx 10xxxxxx。接着，从“汉”的二进制数最后一位开始，从后向前依次填充对应格式中的 x，多出的 x 用 0 补上。这样，就得到了“汉”的 UTF-8 编码为 11100110 10110001 10001001，转换成十六进制就是 0xE6 0xB1 0x89。  </p>
 <p>解码的过程也十分简单：如果一个字节的第一位是 0 ，则说明这个字节对应一个字符；如果一个字节的第一位1，那么连续有多少个 1，就表示该字符占用多少个字节</p>
 <h3 id="UTF-16"><a href="#UTF-16" class="headerlink" title="UTF-16"></a>UTF-16</h3><p>UTF-16 编码介于 UTF-32 与 UTF-8 之间，同时结合了定长和变长两种编码方法的特点。编码规则：<strong>基本平面的字符占用 2 个字节（U+0000 到 U+FFFF），辅助平面的字符占用 4 个字节（U+010000 到 U+10FFFF）</strong>。</p>
@@ -432,7 +435,7 @@
 <p>如果源文件的编码格式不采用操作系统默认格式可能会导致错误表现，在windows平台下用utf-8格式保存java源文件，如果不采用Ide(Ide会智能根据文件编码格式告诉javac用正确的方式)，直接用javac编译该源文件，则会造成乱码（文件保存编码格式和读取编码格式的不匹配）</p>
 <p>JVM之内：当运行java字节码时，读入到内存里的字符或者字符串全部都用char或char[]表示，而char是采用UTF-16的 </p>
 <h3 id="Android编码方式"><a href="#Android编码方式" class="headerlink" title="Android编码方式"></a>Android编码方式</h3><p>Android系统是基于linux内核的，所以默认的Unicode编码方式为UTF-8</p>
-<p><img src="/.cn//unicode_image_3.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_3.png" alt="img"></p>
 <h3 id="开发中处理Unicode"><a href="#开发中处理Unicode" class="headerlink" title="开发中处理Unicode"></a>开发中处理Unicode</h3><ul>
 <li><blockquote>
 <p><strong>Code Point</strong>: 代码点，一个字符的数字表示。一个字符集一般可以用一张或多张由多个行和多个列所构成的二维表来表示。二维表中行与列交叉的点称之为代码点，每个码点分配一个唯一的编号数字，称之为码点值或码点编号，除开某些特殊区域(比如代理区、专用区)的非字符代码点和保留代码点，每个代码点唯一对应于一个字符。 从U+0000 到 U+10FFFF。</p>
@@ -444,8 +447,8 @@
 </li>
 </ul>
 <p>Java的字符在内部以UTF-16编码方式来表示，当字符的Code Point在0号平面，一个Code Unit就能标识字符。<strong>日常开发中需要注意的是一些不常用汉字和emoji，他们会占用多个**</strong>Code Unit**<strong>。</strong></p>
-<p><img src="/.cn//unicode_image_4.png" alt="img"></p>
-<p><img src="/.cn//unicode_image_5.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_4.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_5.png" alt="img"></p>
 <p>String.length返回的是Code Unit的长度，而不是Unicode中字符的长度。对于0号平面的代码点，String.length和我们传统理解的字符的数量是一致的，对于扩展的字符，String.length可能是我们理解的字符长度的两倍，组合字符可能会有更多变化。</p>
 <p>以汉字”𠮷”为例，汉字”𠮷”的 Unicode 码点为 0x20BB7，该码点超出了基本平面的范围（0x0000 - 0xFFFF），因此需要使用四个字节表示。</p>
 <p>所以我们平时在进行字符串截取的时候，不能太过依赖String.length的结果，尤其是经常使用的emojis字符。</p>
@@ -458,13 +461,13 @@
 </ul>
 <p>注意这些方法中的index使用的是code unit值。</p>
 <h3 id="编码方式的encode-decode"><a href="#编码方式的encode-decode" class="headerlink" title="编码方式的encode/decode"></a>编码方式的encode/decode</h3><p>利用String.getBytes() 和 new String() 来进行编码转换</p>
-<p><img src="/.cn//unicode_image_6.png" alt="img"></p>
-<p><img src="/.cn//unicode_image_7.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_6.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_7.png" alt="img"></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">String s&#x3D;&quot;你好&quot;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">byte[] bytes&#x3D;s.getBytes();&#x2F;&#x2F;andorid平台默认是utf-8,编码每个字符占3个字节</span><br><span class="line"></span><br><span class="line">System.out.println(Arrays.toString(bytes));&#x2F;&#x2F;[-28, -67, -96, -27, -91, -67]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">String s1&#x3D;new String(s.getBytes(&quot;utf-8&quot;), &quot;gbk&quot;);&#x2F;&#x2F;浣犲ソ</span><br><span class="line"></span><br><span class="line">String s1&#x3D;new String(s.getBytes(&quot;gbk&quot;), &quot;utf-8&quot;);&#x2F;&#x2F;???</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;正确转码方式</span><br><span class="line"></span><br><span class="line">return new String( s.getBytes(&quot;utf-8&quot;) , &quot;utf-8&quot;);</span><br></pre></td></tr></table></figure>
 
 
 <p>URLEncoder.<em>encode</em>(url)/URLDecoder.<em>decode</em>(url) </p>
-<p><img src="/.cn//unicode_image_8.png" alt="img"></p>
+<p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_8.png" alt="img"></p>
 
       
     </div>
