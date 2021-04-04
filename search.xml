@@ -536,8 +536,6 @@
 <p>各种各样不统一的编码方式成了系统开发者的噩梦，他们提出了一个<strong>“内码表”</strong>的概念，可以切换到相应语言的一个内码表，这样才能显示相应语言的字母。如果你在一台机器上写了一段文字，然后在另一台使用了不同的内码表的机器上打开就会显示出错误。在这种情况下，如果使用多语种，那么就需要频繁的在内码表内进行切换。</p>
 <p><strong>1987年</strong>，来自几个大的科技公司（其中包括苹果和 NeXT）的工程师们开始合作致力于开发一种能在全世界所有书写系统中通用的字符编码系统，于 1991 年 10 月发布的 1.0.0 版本的 Unicode 标准就是这一努力的成果。</p>
 <p><strong>Unicode</strong> 是一本很厚的字典，为世界上几乎所有的书写系统里所使用的每一个字符或符号定义了一个唯一的数字。这个数字叫做<strong>码点（code points）</strong>。最初，Unicode 编码是被设计为 16 位的，提供了 65,536 个字符的空间。后来考虑到要编码历史上的文字以及一些很少使用的日本汉字和<strong>中国汉字</strong>，Unicode 编码扩展到了 21 位（从 U+0000 到 U+<strong>10FFFF</strong>），这 21 位提供了 1,114,112 个码点，其中，只有大概 10% 正在使用，还有很大的扩充空间。</p>
-<img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png" class title="test">
-
 <p><img src="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/unicode_image_1.png" alt="image-20210403204705833"></p>
 <p>Unicode编码空间被分成 17(1+2^4)个<strong>平面</strong>，每个平面有 65,536 (2^16)个字符。0 号平面叫做<strong>「基本多文种平面」</strong>，涵盖了几乎所有你能遇到的字符，<strong>除了 emoji</strong>。其它平面叫做辅助平面，大多是空的。</p>
 <h2 id="Unicode编码解码"><a href="#Unicode编码解码" class="headerlink" title="Unicode编码解码"></a>Unicode编码解码</h2><p>Unicode的实现方式称为Unicode转换格式（Unicode Transformation Format，简称为UTF）。</p>
@@ -609,6 +607,211 @@
 ]]></content>
       <tags>
         <tag>计算机基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>插件化-Android资源解析</title>
+    <url>/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<hr>
+<h2 id="资源编译打包流程："><a href="#资源编译打包流程：" class="headerlink" title="资源编译打包流程："></a>资源编译打包流程：</h2><h3 id="资源文件分类"><a href="#资源文件分类" class="headerlink" title="资源文件分类"></a>资源文件分类</h3><ul>
+<li>assets</li>
+<li>res：<em>animator、anim、color、drawable、layout、menu、values、xml、raw</em></li>
+</ul>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png" alt="image-20210403213115055"></p>
+<ul>
+<li>res文件夹下除了图片文件和res/raw目录的资源，其他资源均会从文本格式的xml文件编译成二进制格式的xml文件</li>
+<li>二进制的xml文件占用空间小，解析速度快。所有的xml标签、属性名称、属性值都会收敛到统一的资源池中，并且会去重。</li>
+<li>资源池中会赋予每个非assets资源一个整数ID值，这些ID值以常量/静态变量的形式定义在R.java文件中，并生成resources.arsc文件，用来描述ID值对应资源的配置信息，相当于是一个资源索引表</li>
+</ul>
+<h3 id="AAPT-Android-Asset-Packaging-Tool-流程："><a href="#AAPT-Android-Asset-Packaging-Tool-流程：" class="headerlink" title="AAPT(Android Asset Packaging Tool)流程："></a>AAPT(Android Asset Packaging Tool)流程：</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_2.png" alt="image-20210403213223823"></p>
+<p><strong>资源表的概念</strong>：aapt在编译应用资源时，会创建一个资源表(使用<strong>ResourceTable</strong>对象来描述)，在应用程序资源编译完成之后，它就会包含所有资源的信息。有这个资源表之后，aapt就可以根据它的内容来生成资源索引表文件resources.arsc了。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_3.png" alt="img" style="zoom:67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_4.png" alt="img" style="zoom: 50%;"></p>
+<ol>
+<li><strong>解析AndroidManifest.xml：</strong>根据package属性值拿到包名并创建一个<strong>ResourceTable</strong>对象</li>
+<li><strong>添加被引用的资源包：</strong>除了应用程序的资源包外，我们通常会引用到系统资源包，例如android:layout_height属性的值为“match_parent”，match_parent实际上就是系统资源包里定义的一个值。系统资源包的packageId等于0x01，应用程序资源包的packageId等于0x7f，每一个资源包都用一个Package对象来描述。</li>
+<li><strong>收集资源文件添加到资源表：</strong>根据资源的类型(drawable、layout等)创建对应的ResourceTypeSet，把不同type的资源项(用Entry对象描述)添加到对应的ResourceTypeSet中，然后将所有的ResourceTypeSet对象都添加到ResourceTable.Package对象中。至此资源表中资源项的资源ID都可以确定了，由PackageId+TypeId+EntryId(表中的index)决定</li>
+<li><strong>编译Xml资源文件：</strong>经历过上述的步骤之后，为编译xml文件做好了所有的准备。</li>
+</ol>
+<ul>
+<li>解析xml：解析xml为内存中的树形结构XMLNode类，每一个XMLNode代表了一个XML元素</li>
+<li>赋予属性名称资源ID：给每一个属性名称赋予资源ID。这一步操作会从跟节点开始递归，读取内存中<strong>ResourceTable</strong>对象获取资源ID。系统定义的属性(android:layout_height)赋予0x01XXXXXX，应用程序内定义的属性(<strong>自定义属性</strong>)赋予0x7fXXXXXX</li>
+<li>解析属性值：这一步是针对属性名称的值进行解析。对于引用类型的属性值例如@+id/test，如果资源表对应的包中没有test资源，则会增加类型为id的Entry到资源包里</li>
+<li>xml文件转换为二进制格式：前面的步骤将所有的资源都解析完毕，接下来将解析过的资源收集起来写入二进制文件</li>
+</ul>
+<ol>
+<li><strong>生成资源索引表resources.arsc：</strong>读取内存中的资源表-收集类型字符串-收集资源项名称字符串-收集资源项值字符串-生成Package数据-依次写入资源索引表</li>
+</ol>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_5.png" alt="img"></p>
+<ol>
+<li><strong>编译AndroidManifest.xml文件：</strong>编译过程与其它的xml资源文件的编译过程一致，之所以要在应用程序的所有资源项都编译完成之后，再编译应用程序的配置文件，是因为后者可能会引用到前者。</li>
+<li><strong>生成R.java文件：</strong>在前面的步骤中，已经将所有的资源项及其所对应的资源ID都收集起来了，这里只要直接将它们写入到指定的R.java文件去就可以了。</li>
+<li><strong>打包到APK文件：</strong>所有资源都编译完成，可以打包到apk文件中了。</li>
+</ol>
+<p>包括assets目录、资源项索引文件resources.arsc、res目录(不包含res/value目录，因为该目录下的资源比较简单，直接写到了resources.arsc文件里)。</p>
+<p>除了这些资源文件外，应用程序的配置文件AndroidManifest.xml以及应用程序代码文件classes.dex，还有用来描述应用程序的签名信息的文件，也会一并被打包到APK文件中。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_6.png" alt="img"></p>
+<h3 id="AAPT2流程"><a href="#AAPT2流程" class="headerlink" title="AAPT2流程"></a>AAPT2流程</h3><p>从 AGP(Android Gradle Plugin) 3.0.0 开始，AAPT2 默认开启，也可以在配置文件中设置android.enableAapt2=false手动关闭</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_7.png" alt="img"></p>
+<p>aapt只有一个编译过程，aapt2将资源编译分为编译-链接2个部分，实现资源文件的增量编译。</p>
+<ul>
+<li><strong>编译阶段：</strong>解析资源文件并生成扩展名为.flat的中间二进制文件</li>
+<li><strong>链接阶段：</strong>将编译阶段生成的所有中间文件(资源表、二进制XML文件和处理过的PNG文件)合并打包到APK文件中，此外在此阶段还可以生成其他辅助文件，如R.java文件和ProGurad规则文件。 </li>
+</ul>
+<h2 id="资源初始化"><a href="#资源初始化" class="headerlink" title="资源初始化"></a>资源初始化</h2><p>App在启动阶段调用AssetManager.addAssetPath(String path)方法把apk文件目录传递进去，将所有的apk信息保存到ApkAssets数组里</p>
+<h2 id="资源查找："><a href="#资源查找：" class="headerlink" title="资源查找："></a>资源查找：</h2><h3 id="调用方式："><a href="#调用方式：" class="headerlink" title="调用方式："></a><strong>调用方式：</strong></h3><ul>
+<li>assets：AssetManager.open</li>
+<li>res：getString(resId)、getColor(resId)、getDrawable(resId)…</li>
+</ul>
+<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_8.png" alt="img" style="zoom:50%;">
+
+<p>内部均是通过AssetManager去搜索apk里面的资源</p>
+<h3 id="调用关系图"><a href="#调用关系图" class="headerlink" title="调用关系图"></a>调用关系图</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_9.png" alt="img"></p>
+<p>AssetManager(Java)：</p>
+<p>Resources类不管通过什么方式获取资源，最终都是调用AssetManager.getResourceValue方法传入资源ID去查找资源值。getResourceValue再调用底层<em>nativeGetResourceValue方法</em></p>
+<p>AssetManager(C++)：</p>
+<ol>
+<li>AssetManager.getResTable：依次解析应用程序的每一个resources.arcs文件，转换为Asset对象，并将解析完成的Asset对象都添加到ResTable对象中。ResTable对象类似aapt过程中的ResourceTable，里面包含了所有资源信息。</li>
+<li>ResTable.getResource(resID…)：通过传入的资源的ID分别获得它的Package ID、Type ID以及Entry ID来查表找到对应的资源Entry</li>
+</ol>
+<h2 id="资源插件化"><a href="#资源插件化" class="headerlink" title="资源插件化"></a>资源插件化</h2><p><strong>为什么：资源插件化减少apk包大小</strong></p>
+<p>通过前面的资源加载查找流程分析，正常情况下应用只能访问到自己apk的资源，四大组件的插件化虽然能加载到插件里面的activity，但插件里面的资源没有被加载到应用内存里面。</p>
+<p><strong>怎么做：</strong></p>
+<p>资源初始化阶段反射方式多次调用AssetManager.addAssetPath(String path)方法，把所有插件的apk路径传递进去。</p>
+<p>构建一个全局的超级Resource对象，在查找时把所有调用到Resource的地方替换成全局的超级Resource对象。</p>
+<p>新插件加载后引起全局资源变化，重新替换已存在Context实例的Resource、AssetManager</p>
+<h3 id="插件引用宿主的资源"><a href="#插件引用宿主的资源" class="headerlink" title="插件引用宿主的资源"></a>插件引用宿主的资源</h3><p>在插件化中，宿主不会直接使用到插件里面的资源，通常是插件共享宿主的资源。</p>
+<p>在插件的资源打包任务（processResourcesTask）完成之后将宿主的R.txt文件合并到插件的R.txt文件中，再将合并后的R.txt转成R.java文件并替换插件的R.java文件，这样插件中的R文件就会包含宿主的资源。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_10.png" alt="img"></p>
+<h4 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h4><h5 id="资源ID冲突："><a href="#资源ID冲突：" class="headerlink" title="资源ID冲突："></a>资源ID冲突：</h5><p>插件和宿主打包apk是独立的，无法保证生成的资源ID值不重复</p>
+<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_11.png" alt="img" style="zoom: 50%;">
+
+<p><strong>资源ID重复有什么影响？</strong></p>
+<p>资源查找流程底层源码：AssetManager.getResTable –&gt; ResTable.getResource：</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_12.png" alt="img" style="zoom: 67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_13.png" alt="img" style="zoom: 67%;"></p>
+<p>结论：查找资源时会优先返回后添加的插件资源，宿主的资源可能被插件覆盖</p>
+<p><strong>解决办法：</strong></p>
+<p>对插件的资源分区，修改插件的packageId与宿主区分</p>
+<p>aapt1：修改aapt源码中生成资源id的逻辑、修改编译后的二进制资源文件</p>
+<p>aapt2(AGP &gt;= 3.0.0默认开启)：执行命令时添加–package-id xx</p>
+<blockquote>
+<p>使用aapt2指定插件资源id的PP字段，需要buildToolsVersion &gt;= 28.0.0</p>
+</blockquote>
+<ul>
+<li><blockquote>
+<p>在buildTools28.0.0版本之前，只支持指定资源id PP字段在0x7f-0xff范围内，尴尬的是Android 8.0之前不支持&gt;0x7f的PP段资源。</p>
+</blockquote>
+</li>
+<li><blockquote>
+<p>buildTools28.0.0版本开始提供 –allow-reserved-package-id参数，可以指定0x02 -0x7e范围内的PP段资源。</p>
+</blockquote>
+</li>
+</ul>
+<p>–allow-reserved-package-id –package-id  xxxx</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_14.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_15.png" alt="img"></p>
+<p><strong>mira实现：</strong>通过gradle插件收集packageId，添加aapt编译命令参数</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_16.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_17.png" alt="img" style="zoom:67%;"></p>
+<h5 id="资源固定"><a href="#资源固定" class="headerlink" title="资源固定"></a>资源固定</h5><p>资源固定是为了使插件具备跨宿主版本的能力。</p>
+<p>在打包插件时，会合并宿主当前版本的R文件，后续宿主包中有新增/删除资源时，宿主aapt编译生成的资源ID顺序改变，导致插件访问到错误的宿主资源</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_18.png" alt="image-20210403214422582"></p>
+<p>所以需要把依赖到宿主的资源写在public.xml中固定，确保每一个版本依赖的资源ID都不变。</p>
+<h5 id="资源名称冲突"><a href="#资源名称冲突" class="headerlink" title="资源名称冲突"></a>资源名称冲突</h5><p><a href="https://bytedance.feishu.cn/docs/doccnd8n5SzzefNE9y13eyXnFVb">Lite插件与宿主资源重复问题分析</a></p>
+]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>十分钟了解Android依赖关系</title>
+    <url>/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/</url>
+    <content><![CDATA[<h2 id="依赖关系展示"><a href="#依赖关系展示" class="headerlink" title="依赖关系展示"></a>依赖关系展示</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">apiDependenciesMetadata</span><br><span class="line">...</span><br><span class="line">debugCompileClasspath - Compile classpath for compilation &#39;debug&#39; (target  (androidJvm))</span><br><span class="line">...</span><br><span class="line">debugCompileOnly - Compile only dependencies for compilation &#39;debug&#39; (target  (androidJvm)).</span><br><span class="line">...</span><br><span class="line">releaseCompileClasspath - Compile classpath for compilation &#39;release&#39; (target  (androidJvm)).</span><br><span class="line">...</span><br><span class="line">implementation - Implementation only dependencies for &#39;main&#39; sources. (n)</span><br><span class="line">...</span><br><span class="line">releaseRuntimeClasspath - Runtime classpath of compilation &#39;release&#39; (target  (androidJvm)).</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>依赖关系的展示路径包含依赖方式(configuration)+编译变体的组合：</p>
+<ol>
+<li>依赖方式(可单独配置展示)：CompileClasspath编译时、RuntimeClasspath运行时、CompileOnly、RuntimeOnly、等</li>
+</ol>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_1.png" alt="img"></p>
+<ol start="2">
+<li>编译变体：Build Type+Product Flavor，没有flavor为debug、release、test等。如果有flavor则为toutiaoDebug、liteRelease等</li>
+</ol>
+<p>例如：debugCompileOnly、releaseCompileClasspath等</p>
+<h2 id="查看依赖关系的方式"><a href="#查看依赖关系的方式" class="headerlink" title="查看依赖关系的方式"></a>查看依赖关系的方式</h2><h3 id="一、命令行："><a href="#一、命令行：" class="headerlink" title="一、命令行："></a>一、命令行：</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.&#x2F;gradlew $&#123;module&#125;:dependencies</span><br></pre></td></tr></table></figure>
+<p>列出该模块下所有第三方类库的依赖树组合</p>
+<p>如果只想输入特定组合的依赖树，可以使用–configuration配置</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;仅输入debugCompileOnly的依赖关系</span><br><span class="line"></span><br><span class="line">.&#x2F;gradlew $&#123;module&#125;:dependencies --configuration debugCompileOnly </span><br></pre></td></tr></table></figure>
+
+
+<h3 id="二、Gradle插件："><a href="#二、Gradle插件：" class="headerlink" title="二、Gradle插件："></a>二、Gradle插件：</h3><p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_2.png" alt="img"></p>
+<p><strong>dependencies</strong>：与命令行操作一致，输出模块的所有依赖</p>
+<p><strong>dependencyInsight</strong>：解释依赖树中的一个依赖如何被选择，为什么被选择(逆向打印依赖关系)。可用作”Could not resolve com.xxx:okhttp:{strictly 3.0.0}”版本号冲突问题的排查</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;thread为第三方依赖库</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;图1 debugCompileOnly  CompileOnly依赖路径</span><br><span class="line"></span><br><span class="line">.&#x2F;gradlew comment:dependencyInsight --dependency thread --configuration debugCompileOnly</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;图2 debugCompileClasspath   编译期依赖路径</span><br><span class="line"></span><br><span class="line">.&#x2F;gradlew comment:dependencyInsight --dependency thread --configuration debugCompileClasspath</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_3.png" alt="img"></p>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_4.png" alt="img"></p>
+<h3 id="三、Gradle官方构建分析页面"><a href="#三、Gradle官方构建分析页面" class="headerlink" title="三、Gradle官方构建分析页面"></a>三、Gradle官方构建分析页面</h3><p>如果嫌弃命令行窗口查看依赖树不友好，或者需要查看整个工程项目的依赖树时，有一种方式可以到HTML网页查看依赖树</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.&#x2F;gradlew build --scan</span><br></pre></td></tr></table></figure>
+<p>在工程根目录输入这个命令后，会出现如下：</p>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_5.png" alt="img"></p>
+<p>输入yes后会在Gradle官方页面生成构建页面</p>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_6.png" alt="img"></p>
+<p>用任意邮箱登录后可更方便的查看整个项目的依赖关系</p>
+<p><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_7.png" alt="img"><img src="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/image_8.png" alt="img"></p>
+<h2 id="依赖关系分析"><a href="#依赖关系分析" class="headerlink" title="依赖关系分析"></a>依赖关系分析</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- androidx.recyclerview:recyclerview:1.0.0</span><br><span class="line">|    +--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    +--- androidx.core:core:1.0.0</span><br><span class="line">|    |    +--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |    +--- androidx.collection:collection:1.0.0</span><br><span class="line">|    |    |    \--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |    +--- androidx.lifecycle:lifecycle-runtime:2.0.0</span><br><span class="line">|    |    |    +--- androidx.lifecycle:lifecycle-common:2.0.0</span><br><span class="line">|    |    |    |    \--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |    |    +--- androidx.arch.core:core-common:2.0.0</span><br><span class="line">|    |    |    |    \--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |    |    \--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |    \--- androidx.versionedparcelable:versionedparcelable:1.0.0</span><br><span class="line">|    |         +--- androidx.annotation:annotation:1.0.0</span><br><span class="line">|    |         \--- androidx.collection:collection:1.0.0 (*)</span><br><span class="line">|    \--- androidx.legacy:legacy-support-core-ui:1.0.0</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p><strong>符号定义：</strong></p>
+<ul>
+<li>+- - - 是依赖分支库的开始。</li>
+<li>| 标识还是在之前的依赖库中的依赖，显示它依赖的库。</li>
+<li>- - - 是依赖库的末尾。</li>
+<li>(*)意味着该库的进一步依赖关系不会显示，因为它们已经列在其他某个子依赖树中</li>
+<li>-&gt;Gradle 发现多个依赖库都依赖到同一个库但是不同版本，强制转换版本，可体现源码依赖</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>插件与宿主资源名重复问题分析</title>
+    <url>/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h3 id="问题背景："><a href="#问题背景：" class="headerlink" title="问题背景："></a>问题背景：</h3><ol>
+<li>tt_ugc_business仓库ugc-view模块中直播头像相关的自定义View(UserAvatarLiveView)被多个非ugc业务方依赖，已经不适合放在ugc-view模块，所以计划迁移到更通用的Guadian仓库image模块</li>
+<li>image模块是以flavor的形式在头条主端和lite端使用的，为了隔绝上层依赖独立仓库模块时需要配置flavor，独立仓库模块依赖image都是以<strong>complieOnly</strong>的形式。</li>
+</ol>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_1.png" alt="img"></p>
+<ol start="3">
+<li>ugc-view模块在xml文件中使用了UserAvatarLiveView类的自定义属性，compileOnly的依赖方式会导致image模块的资源文件无法引用从而打aar失败，所以ugc-view模块中用到image的资源被迫在模块中重新声明一遍才能打包通过。</li>
+</ol>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_2.png" alt="img"></p>
+<p><strong>最终结果：ugc-view和image模块里都存在UserAvatarLiveView类自定义属性的声明（complieOnly的弊端）</strong></p>
+<h3 id="问题出现"><a href="#问题出现" class="headerlink" title="问题出现"></a>问题出现</h3><p>迁移代码合入主端ttmain之后表现正常。</p>
+<p>lite端同步升级ugc-view和image模块版本号之后，发现直播头像外框大小异常</p>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_3.png" alt="img"><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_4.png" alt="img"></p>
+<h3 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h3><ol>
+<li>找到对应宿主的类UserAvatarLiveView断点分析，dubug获取的外框属性值取到的是默认值76dp。</li>
+</ol>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_5.png" alt="img"></p>
+<p>猜测是自定义属性值未生效导致</p>
+<p>这个现象就比较奇怪了，同样的代码主端没问题，lite却拿不到对应的自定义属性值（如何去分析）</p>
+<ol start="2">
+<li>排查发现UserAvatarLiveView类的attr的声明在ugc-view和image两个aar模块中都存在，而image模块是打包在lite宿主中的，ugc-view是打包在newugc插件中的，会不会是attr资源id没对应上呢</li>
+</ol>
+<ol start="3">
+<li>分析宿主apk和插件apk中是否存在对应的属性id</li>
+</ol>
+<p>宿主的R文件(1.2w行)和resources.arcs文件</p>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_6.png" alt="img"><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_7.png" alt="img"></p>
+<p>newugc插件的R文件(1.6w行)和resources.arcs文件</p>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_8.png" alt="img"><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_9.png" alt="img"></p>
+<p>可以看到宿主和插件中都存在对应属性的定义，并且插件中的属性id会被加上插件固定的前缀。</p>
+<p>Mira框架打插件时会合并插件和宿主的R文件，资源名称冲突的非id类型资源会使用插件里的</p>
+<p>如果在ugc-view模块的xml中设置自定义属性，属性字符串animation_live_circle_height会索引到插件的资源ID(0x36030004)</p>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_10.png" alt="img"></p>
+<p>而插件中的ugc-view模块代码在使用宿主image模块的UserAvatarLiveView类时会根据宿主的资源ID(0x7f010134)去查找，由于属性ID(0x7f010134)并未被赋值，所以就使用了默认值76dp。</p>
+<p><img src="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/image_11.png" alt="img"></p>
+<h3 id="解决-amp-总结"><a href="#解决-amp-总结" class="headerlink" title="解决&amp;总结"></a>解决&amp;总结</h3><ul>
+<li>临时的解决方法是把ugc-view模块中xml文件用到的自定义属性全部删除，改成用java代码去设置属性值。这样就不存在属性声明重复导致的问题了。</li>
+<li>问题的难点在于排查分析原因。该bug出现的前提条件较多，插件与宿主资源重复的场景也比较小，属于非常规case，如果没有正确的思路指引，排查起来会比较耗费精力。</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Android</tag>
       </tags>
   </entry>
 </search>

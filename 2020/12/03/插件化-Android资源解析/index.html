@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/icon.png?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="资源编译打包流程：资源文件分类 assets res：animator、anim、color、drawable、layout、menu、values、xml、raw    res文件夹下除了图片文件和res&#x2F;raw目录的资源，其他资源均会从文本格式的xml文件编译成二进制格式的xml文件 二进制的xml文件占用空间小，解析速度快。所有的xml标签、属性名称、属性值都会收敛到统一的资源池中，并且会">
+<meta property="og:type" content="article">
+<meta property="og:title" content="插件化-Android资源解析">
+<meta property="og:url" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="無恙">
+<meta property="og:description" content="资源编译打包流程：资源文件分类 assets res：animator、anim、color、drawable、layout、menu、values、xml、raw    res文件夹下除了图片文件和res&#x2F;raw目录的资源，其他资源均会从文本格式的xml文件编译成二进制格式的xml文件 二进制的xml文件占用空间小，解析速度快。所有的xml标签、属性名称、属性值都会收敛到统一的资源池中，并且会">
+<meta property="og:locale">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_2.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_3.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_4.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_5.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_6.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_7.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_8.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_9.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_10.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_11.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_12.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_13.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_14.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_15.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_16.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_17.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_18.png">
+<meta property="article:published_time" content="2020-12-03T13:19:44.000Z">
+<meta property="article:modified_time" content="2021-04-03T14:01:10.869Z">
+<meta property="article:author" content="TL">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.autism-tl.cn/2020/12/03/插件化-Android资源解析/"/>
+
+
+
+
+
+  <title>插件化-Android资源解析 | 無恙</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無恙</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">不算纯粹,但愿优雅</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/%E5%A4%B4%E5%83%8F.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無恙">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">插件化-Android资源解析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-03T21:19:44+08:00">
+                2020-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,190
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  8
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<h2 id="资源编译打包流程："><a href="#资源编译打包流程：" class="headerlink" title="资源编译打包流程："></a>资源编译打包流程：</h2><h3 id="资源文件分类"><a href="#资源文件分类" class="headerlink" title="资源文件分类"></a>资源文件分类</h3><ul>
+<li>assets</li>
+<li>res：<em>animator、anim、color、drawable、layout、menu、values、xml、raw</em></li>
+</ul>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png" alt="image-20210403213115055"></p>
+<ul>
+<li>res文件夹下除了图片文件和res/raw目录的资源，其他资源均会从文本格式的xml文件编译成二进制格式的xml文件</li>
+<li>二进制的xml文件占用空间小，解析速度快。所有的xml标签、属性名称、属性值都会收敛到统一的资源池中，并且会去重。</li>
+<li>资源池中会赋予每个非assets资源一个整数ID值，这些ID值以常量/静态变量的形式定义在R.java文件中，并生成resources.arsc文件，用来描述ID值对应资源的配置信息，相当于是一个资源索引表</li>
+</ul>
+<h3 id="AAPT-Android-Asset-Packaging-Tool-流程："><a href="#AAPT-Android-Asset-Packaging-Tool-流程：" class="headerlink" title="AAPT(Android Asset Packaging Tool)流程："></a>AAPT(Android Asset Packaging Tool)流程：</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_2.png" alt="image-20210403213223823"></p>
+<p><strong>资源表的概念</strong>：aapt在编译应用资源时，会创建一个资源表(使用<strong>ResourceTable</strong>对象来描述)，在应用程序资源编译完成之后，它就会包含所有资源的信息。有这个资源表之后，aapt就可以根据它的内容来生成资源索引表文件resources.arsc了。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_3.png" alt="img" style="zoom:67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_4.png" alt="img" style="zoom: 50%;"></p>
+<ol>
+<li><strong>解析AndroidManifest.xml：</strong>根据package属性值拿到包名并创建一个<strong>ResourceTable</strong>对象</li>
+<li><strong>添加被引用的资源包：</strong>除了应用程序的资源包外，我们通常会引用到系统资源包，例如android:layout_height属性的值为“match_parent”，match_parent实际上就是系统资源包里定义的一个值。系统资源包的packageId等于0x01，应用程序资源包的packageId等于0x7f，每一个资源包都用一个Package对象来描述。</li>
+<li><strong>收集资源文件添加到资源表：</strong>根据资源的类型(drawable、layout等)创建对应的ResourceTypeSet，把不同type的资源项(用Entry对象描述)添加到对应的ResourceTypeSet中，然后将所有的ResourceTypeSet对象都添加到ResourceTable.Package对象中。至此资源表中资源项的资源ID都可以确定了，由PackageId+TypeId+EntryId(表中的index)决定</li>
+<li><strong>编译Xml资源文件：</strong>经历过上述的步骤之后，为编译xml文件做好了所有的准备。</li>
+</ol>
+<ul>
+<li>解析xml：解析xml为内存中的树形结构XMLNode类，每一个XMLNode代表了一个XML元素</li>
+<li>赋予属性名称资源ID：给每一个属性名称赋予资源ID。这一步操作会从跟节点开始递归，读取内存中<strong>ResourceTable</strong>对象获取资源ID。系统定义的属性(android:layout_height)赋予0x01XXXXXX，应用程序内定义的属性(<strong>自定义属性</strong>)赋予0x7fXXXXXX</li>
+<li>解析属性值：这一步是针对属性名称的值进行解析。对于引用类型的属性值例如@+id/test，如果资源表对应的包中没有test资源，则会增加类型为id的Entry到资源包里</li>
+<li>xml文件转换为二进制格式：前面的步骤将所有的资源都解析完毕，接下来将解析过的资源收集起来写入二进制文件</li>
+</ul>
+<ol>
+<li><strong>生成资源索引表resources.arsc：</strong>读取内存中的资源表-收集类型字符串-收集资源项名称字符串-收集资源项值字符串-生成Package数据-依次写入资源索引表</li>
+</ol>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_5.png" alt="img"></p>
+<ol>
+<li><strong>编译AndroidManifest.xml文件：</strong>编译过程与其它的xml资源文件的编译过程一致，之所以要在应用程序的所有资源项都编译完成之后，再编译应用程序的配置文件，是因为后者可能会引用到前者。</li>
+<li><strong>生成R.java文件：</strong>在前面的步骤中，已经将所有的资源项及其所对应的资源ID都收集起来了，这里只要直接将它们写入到指定的R.java文件去就可以了。</li>
+<li><strong>打包到APK文件：</strong>所有资源都编译完成，可以打包到apk文件中了。</li>
+</ol>
+<p>包括assets目录、资源项索引文件resources.arsc、res目录(不包含res/value目录，因为该目录下的资源比较简单，直接写到了resources.arsc文件里)。</p>
+<p>除了这些资源文件外，应用程序的配置文件AndroidManifest.xml以及应用程序代码文件classes.dex，还有用来描述应用程序的签名信息的文件，也会一并被打包到APK文件中。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_6.png" alt="img"></p>
+<h3 id="AAPT2流程"><a href="#AAPT2流程" class="headerlink" title="AAPT2流程"></a>AAPT2流程</h3><p>从 AGP(Android Gradle Plugin) 3.0.0 开始，AAPT2 默认开启，也可以在配置文件中设置android.enableAapt2=false手动关闭</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_7.png" alt="img"></p>
+<p>aapt只有一个编译过程，aapt2将资源编译分为编译-链接2个部分，实现资源文件的增量编译。</p>
+<ul>
+<li><strong>编译阶段：</strong>解析资源文件并生成扩展名为.flat的中间二进制文件</li>
+<li><strong>链接阶段：</strong>将编译阶段生成的所有中间文件(资源表、二进制XML文件和处理过的PNG文件)合并打包到APK文件中，此外在此阶段还可以生成其他辅助文件，如R.java文件和ProGurad规则文件。 </li>
+</ul>
+<h2 id="资源初始化"><a href="#资源初始化" class="headerlink" title="资源初始化"></a>资源初始化</h2><p>App在启动阶段调用AssetManager.addAssetPath(String path)方法把apk文件目录传递进去，将所有的apk信息保存到ApkAssets数组里</p>
+<h2 id="资源查找："><a href="#资源查找：" class="headerlink" title="资源查找："></a>资源查找：</h2><h3 id="调用方式："><a href="#调用方式：" class="headerlink" title="调用方式："></a><strong>调用方式：</strong></h3><ul>
+<li>assets：AssetManager.open</li>
+<li>res：getString(resId)、getColor(resId)、getDrawable(resId)…</li>
+</ul>
+<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_8.png" alt="img" style="zoom:50%;">
+
+<p>内部均是通过AssetManager去搜索apk里面的资源</p>
+<h3 id="调用关系图"><a href="#调用关系图" class="headerlink" title="调用关系图"></a>调用关系图</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_9.png" alt="img"></p>
+<p>AssetManager(Java)：</p>
+<p>Resources类不管通过什么方式获取资源，最终都是调用AssetManager.getResourceValue方法传入资源ID去查找资源值。getResourceValue再调用底层<em>nativeGetResourceValue方法</em></p>
+<p>AssetManager(C++)：</p>
+<ol>
+<li>AssetManager.getResTable：依次解析应用程序的每一个resources.arcs文件，转换为Asset对象，并将解析完成的Asset对象都添加到ResTable对象中。ResTable对象类似aapt过程中的ResourceTable，里面包含了所有资源信息。</li>
+<li>ResTable.getResource(resID…)：通过传入的资源的ID分别获得它的Package ID、Type ID以及Entry ID来查表找到对应的资源Entry</li>
+</ol>
+<h2 id="资源插件化"><a href="#资源插件化" class="headerlink" title="资源插件化"></a>资源插件化</h2><p><strong>为什么：资源插件化减少apk包大小</strong></p>
+<p>通过前面的资源加载查找流程分析，正常情况下应用只能访问到自己apk的资源，四大组件的插件化虽然能加载到插件里面的activity，但插件里面的资源没有被加载到应用内存里面。</p>
+<p><strong>怎么做：</strong></p>
+<p>资源初始化阶段反射方式多次调用AssetManager.addAssetPath(String path)方法，把所有插件的apk路径传递进去。</p>
+<p>构建一个全局的超级Resource对象，在查找时把所有调用到Resource的地方替换成全局的超级Resource对象。</p>
+<p>新插件加载后引起全局资源变化，重新替换已存在Context实例的Resource、AssetManager</p>
+<h3 id="插件引用宿主的资源"><a href="#插件引用宿主的资源" class="headerlink" title="插件引用宿主的资源"></a>插件引用宿主的资源</h3><p>在插件化中，宿主不会直接使用到插件里面的资源，通常是插件共享宿主的资源。</p>
+<p>在插件的资源打包任务（processResourcesTask）完成之后将宿主的R.txt文件合并到插件的R.txt文件中，再将合并后的R.txt转成R.java文件并替换插件的R.java文件，这样插件中的R文件就会包含宿主的资源。</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_10.png" alt="img"></p>
+<h4 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h4><h5 id="资源ID冲突："><a href="#资源ID冲突：" class="headerlink" title="资源ID冲突："></a>资源ID冲突：</h5><p>插件和宿主打包apk是独立的，无法保证生成的资源ID值不重复</p>
+<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_11.png" alt="img" style="zoom: 50%;">
+
+<p><strong>资源ID重复有什么影响？</strong></p>
+<p>资源查找流程底层源码：AssetManager.getResTable –&gt; ResTable.getResource：</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_12.png" alt="img" style="zoom: 67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_13.png" alt="img" style="zoom: 67%;"></p>
+<p>结论：查找资源时会优先返回后添加的插件资源，宿主的资源可能被插件覆盖</p>
+<p><strong>解决办法：</strong></p>
+<p>对插件的资源分区，修改插件的packageId与宿主区分</p>
+<p>aapt1：修改aapt源码中生成资源id的逻辑、修改编译后的二进制资源文件</p>
+<p>aapt2(AGP &gt;= 3.0.0默认开启)：执行命令时添加–package-id xx</p>
+<blockquote>
+<p>使用aapt2指定插件资源id的PP字段，需要buildToolsVersion &gt;= 28.0.0</p>
+</blockquote>
+<ul>
+<li><blockquote>
+<p>在buildTools28.0.0版本之前，只支持指定资源id PP字段在0x7f-0xff范围内，尴尬的是Android 8.0之前不支持&gt;0x7f的PP段资源。</p>
+</blockquote>
+</li>
+<li><blockquote>
+<p>buildTools28.0.0版本开始提供 –allow-reserved-package-id参数，可以指定0x02 -0x7e范围内的PP段资源。</p>
+</blockquote>
+</li>
+</ul>
+<p>–allow-reserved-package-id –package-id  xxxx</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_14.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_15.png" alt="img"></p>
+<p><strong>mira实现：</strong>通过gradle插件收集packageId，添加aapt编译命令参数</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_16.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_17.png" alt="img" style="zoom:67%;"></p>
+<h5 id="资源固定"><a href="#资源固定" class="headerlink" title="资源固定"></a>资源固定</h5><p>资源固定是为了使插件具备跨宿主版本的能力。</p>
+<p>在打包插件时，会合并宿主当前版本的R文件，后续宿主包中有新增/删除资源时，宿主aapt编译生成的资源ID顺序改变，导致插件访问到错误的宿主资源</p>
+<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_18.png" alt="image-20210403214422582"></p>
+<p>所以需要把依赖到宿主的资源写在public.xml中固定，确保每一个版本依赖的资源ID都不变。</p>
+<h5 id="资源名称冲突"><a href="#资源名称冲突" class="headerlink" title="资源名称冲突"></a>资源名称冲突</h5><p><a target="_blank" rel="noopener" href="https://bytedance.feishu.cn/docs/doccnd8n5SzzefNE9y13eyXnFVb">Lite插件与宿主资源重复问题分析</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    TL
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/" title="插件化-Android资源解析">http://www.autism-tl.cn/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/</a>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/21/Unicode%E7%BC%96%E7%A0%81/" rel="next" title="Unicode编码">
+                <i class="fa fa-chevron-left"></i> Unicode编码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/" rel="prev" title="插件与宿主资源名重复问题分析">
+                插件与宿主资源名重复问题分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/%E5%A4%B4%E5%83%8F.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AutismTl" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E7%BC%96%E8%AF%91%E6%89%93%E5%8C%85%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">资源编译打包流程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%88%86%E7%B1%BB"><span class="nav-number">1.1.</span> <span class="nav-text">资源文件分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AAPT-Android-Asset-Packaging-Tool-%E6%B5%81%E7%A8%8B%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">AAPT(Android Asset Packaging Tool)流程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AAPT2%E6%B5%81%E7%A8%8B"><span class="nav-number">1.3.</span> <span class="nav-text">AAPT2流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">资源初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%9F%A5%E6%89%BE%EF%BC%9A"><span class="nav-number">3.</span> <span class="nav-text">资源查找：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">调用方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E5%85%B3%E7%B3%BB%E5%9B%BE"><span class="nav-number">3.2.</span> <span class="nav-text">调用关系图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%8F%92%E4%BB%B6%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">资源插件化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E5%BC%95%E7%94%A8%E5%AE%BF%E4%B8%BB%E7%9A%84%E8%B5%84%E6%BA%90"><span class="nav-number">4.1.</span> <span class="nav-text">插件引用宿主的资源</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E8%83%BD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.1.</span> <span class="nav-text">可能遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B5%84%E6%BA%90ID%E5%86%B2%E7%AA%81%EF%BC%9A"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">资源ID冲突：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%9B%BA%E5%AE%9A"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">资源固定</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%90%8D%E7%A7%B0%E5%86%B2%E7%AA%81"><span class="nav-number">4.1.1.3.</span> <span class="nav-text">资源名称冲突</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TL</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
