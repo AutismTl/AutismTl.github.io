@@ -611,21 +611,21 @@
   </entry>
   <entry>
     <title>插件化-Android资源解析</title>
-    <url>/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/</url>
+    <url>/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/</url>
     <content><![CDATA[<hr>
 <h2 id="资源编译打包流程："><a href="#资源编译打包流程：" class="headerlink" title="资源编译打包流程："></a>资源编译打包流程：</h2><h3 id="资源文件分类"><a href="#资源文件分类" class="headerlink" title="资源文件分类"></a>资源文件分类</h3><ul>
 <li>assets</li>
 <li>res：<em>animator、anim、color、drawable、layout、menu、values、xml、raw</em></li>
 </ul>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png" alt="image-20210403213115055"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_1.png" alt="image-20210403213115055"></p>
 <ul>
 <li>res文件夹下除了图片文件和res/raw目录的资源，其他资源均会从文本格式的xml文件编译成二进制格式的xml文件</li>
 <li>二进制的xml文件占用空间小，解析速度快。所有的xml标签、属性名称、属性值都会收敛到统一的资源池中，并且会去重。</li>
 <li>资源池中会赋予每个非assets资源一个整数ID值，这些ID值以常量/静态变量的形式定义在R.java文件中，并生成resources.arsc文件，用来描述ID值对应资源的配置信息，相当于是一个资源索引表</li>
 </ul>
-<h3 id="AAPT-Android-Asset-Packaging-Tool-流程："><a href="#AAPT-Android-Asset-Packaging-Tool-流程：" class="headerlink" title="AAPT(Android Asset Packaging Tool)流程："></a>AAPT(Android Asset Packaging Tool)流程：</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_2.png" alt="image-20210403213223823"></p>
+<h3 id="AAPT-Android-Asset-Packaging-Tool-流程："><a href="#AAPT-Android-Asset-Packaging-Tool-流程：" class="headerlink" title="AAPT(Android Asset Packaging Tool)流程："></a>AAPT(Android Asset Packaging Tool)流程：</h3><p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_2.png" alt="image-20210403213223823"></p>
 <p><strong>资源表的概念</strong>：aapt在编译应用资源时，会创建一个资源表(使用<strong>ResourceTable</strong>对象来描述)，在应用程序资源编译完成之后，它就会包含所有资源的信息。有这个资源表之后，aapt就可以根据它的内容来生成资源索引表文件resources.arsc了。</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_3.png" alt="img" style="zoom:67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_4.png" alt="img" style="zoom: 50%;"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_3.png" alt="img" style="zoom:67%;"><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_4.png" alt="img" style="zoom: 50%;"></p>
 <ol>
 <li><strong>解析AndroidManifest.xml：</strong>根据package属性值拿到包名并创建一个<strong>ResourceTable</strong>对象</li>
 <li><strong>添加被引用的资源包：</strong>除了应用程序的资源包外，我们通常会引用到系统资源包，例如android:layout_height属性的值为“match_parent”，match_parent实际上就是系统资源包里定义的一个值。系统资源包的packageId等于0x01，应用程序资源包的packageId等于0x7f，每一个资源包都用一个Package对象来描述。</li>
@@ -641,7 +641,7 @@
 <ol>
 <li><strong>生成资源索引表resources.arsc：</strong>读取内存中的资源表-收集类型字符串-收集资源项名称字符串-收集资源项值字符串-生成Package数据-依次写入资源索引表</li>
 </ol>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_5.png" alt="img"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_5.png" alt="img"></p>
 <ol>
 <li><strong>编译AndroidManifest.xml文件：</strong>编译过程与其它的xml资源文件的编译过程一致，之所以要在应用程序的所有资源项都编译完成之后，再编译应用程序的配置文件，是因为后者可能会引用到前者。</li>
 <li><strong>生成R.java文件：</strong>在前面的步骤中，已经将所有的资源项及其所对应的资源ID都收集起来了，这里只要直接将它们写入到指定的R.java文件去就可以了。</li>
@@ -649,9 +649,9 @@
 </ol>
 <p>包括assets目录、资源项索引文件resources.arsc、res目录(不包含res/value目录，因为该目录下的资源比较简单，直接写到了resources.arsc文件里)。</p>
 <p>除了这些资源文件外，应用程序的配置文件AndroidManifest.xml以及应用程序代码文件classes.dex，还有用来描述应用程序的签名信息的文件，也会一并被打包到APK文件中。</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_6.png" alt="img"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_6.png" alt="img"></p>
 <h3 id="AAPT2流程"><a href="#AAPT2流程" class="headerlink" title="AAPT2流程"></a>AAPT2流程</h3><p>从 AGP(Android Gradle Plugin) 3.0.0 开始，AAPT2 默认开启，也可以在配置文件中设置android.enableAapt2=false手动关闭</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_7.png" alt="img"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_7.png" alt="img"></p>
 <p>aapt只有一个编译过程，aapt2将资源编译分为编译-链接2个部分，实现资源文件的增量编译。</p>
 <ul>
 <li><strong>编译阶段：</strong>解析资源文件并生成扩展名为.flat的中间二进制文件</li>
@@ -662,10 +662,10 @@
 <li>assets：AssetManager.open</li>
 <li>res：getString(resId)、getColor(resId)、getDrawable(resId)…</li>
 </ul>
-<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_8.png" alt="img" style="zoom:50%;">
+<img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_8.png" alt="img" style="zoom:50%;">
 
 <p>内部均是通过AssetManager去搜索apk里面的资源</p>
-<h3 id="调用关系图"><a href="#调用关系图" class="headerlink" title="调用关系图"></a>调用关系图</h3><p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_9.png" alt="img"></p>
+<h3 id="调用关系图"><a href="#调用关系图" class="headerlink" title="调用关系图"></a>调用关系图</h3><p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_9.png" alt="img"></p>
 <p>AssetManager(Java)：</p>
 <p>Resources类不管通过什么方式获取资源，最终都是调用AssetManager.getResourceValue方法传入资源ID去查找资源值。getResourceValue再调用底层<em>nativeGetResourceValue方法</em></p>
 <p>AssetManager(C++)：</p>
@@ -681,13 +681,13 @@
 <p>新插件加载后引起全局资源变化，重新替换已存在Context实例的Resource、AssetManager</p>
 <h3 id="插件引用宿主的资源"><a href="#插件引用宿主的资源" class="headerlink" title="插件引用宿主的资源"></a>插件引用宿主的资源</h3><p>在插件化中，宿主不会直接使用到插件里面的资源，通常是插件共享宿主的资源。</p>
 <p>在插件的资源打包任务（processResourcesTask）完成之后将宿主的R.txt文件合并到插件的R.txt文件中，再将合并后的R.txt转成R.java文件并替换插件的R.java文件，这样插件中的R文件就会包含宿主的资源。</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_10.png" alt="img"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_10.png" alt="img"></p>
 <h4 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h4><h5 id="资源ID冲突："><a href="#资源ID冲突：" class="headerlink" title="资源ID冲突："></a>资源ID冲突：</h5><p>插件和宿主打包apk是独立的，无法保证生成的资源ID值不重复</p>
-<img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_11.png" alt="img" style="zoom: 50%;">
+<img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_11.png" alt="img" style="zoom: 50%;">
 
 <p><strong>资源ID重复有什么影响？</strong></p>
 <p>资源查找流程底层源码：AssetManager.getResTable –&gt; ResTable.getResource：</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_12.png" alt="img" style="zoom: 67%;"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_13.png" alt="img" style="zoom: 67%;"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_12.png" alt="img" style="zoom: 67%;"><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_13.png" alt="img" style="zoom: 67%;"></p>
 <p>结论：查找资源时会优先返回后添加的插件资源，宿主的资源可能被插件覆盖</p>
 <p><strong>解决办法：</strong></p>
 <p>对插件的资源分区，修改插件的packageId与宿主区分</p>
@@ -707,14 +707,14 @@
 </li>
 </ul>
 <p>–allow-reserved-package-id –package-id  xxxx</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_14.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_15.png" alt="img"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_14.png" alt="img"><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_15.png" alt="img"></p>
 <p><strong>mira实现：</strong>通过gradle插件收集packageId，添加aapt编译命令参数</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_16.png" alt="img"><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_17.png" alt="img" style="zoom:67%;"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_16.png" alt="img"><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_17.png" alt="img" style="zoom:67%;"></p>
 <h5 id="资源固定"><a href="#资源固定" class="headerlink" title="资源固定"></a>资源固定</h5><p>资源固定是为了使插件具备跨宿主版本的能力。</p>
 <p>在打包插件时，会合并宿主当前版本的R文件，后续宿主包中有新增/删除资源时，宿主aapt编译生成的资源ID顺序改变，导致插件访问到错误的宿主资源</p>
-<p><img src="/2020/12/03/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_18.png" alt="image-20210403214422582"></p>
+<p><img src="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/image_18.png" alt="image-20210403214422582"></p>
 <p>所以需要把依赖到宿主的资源写在public.xml中固定，确保每一个版本依赖的资源ID都不变。</p>
-<h5 id="资源名称冲突"><a href="#资源名称冲突" class="headerlink" title="资源名称冲突"></a>资源名称冲突</h5><p><a href="https://bytedance.feishu.cn/docs/doccnd8n5SzzefNE9y13eyXnFVb">Lite插件与宿主资源重复问题分析</a></p>
+<h5 id="资源名称冲突"><a href="#资源名称冲突" class="headerlink" title="资源名称冲突"></a>资源名称冲突</h5><p><a href="http://www.autism-tl.cn/2020/12/22/%E6%8F%92%E4%BB%B6%E4%B8%8E%E5%AE%BF%E4%B8%BB%E8%B5%84%E6%BA%90%E5%90%8D%E9%87%8D%E5%A4%8D%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90/#more">Lite插件与宿主资源重复问题分析</a></p>
 ]]></content>
       <tags>
         <tag>Android</tag>
