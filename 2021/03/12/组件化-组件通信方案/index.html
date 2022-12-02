@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/icon.png?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背景组件化问题：随着业务的发展扩张，业务划分粒度越来越细，多个业务团队在同一个module里面修改&#x2F;维护代码的成本线性增加。合码冲突，bug率高，一个业务方改动代码，其他业务方都会受到不易被察觉的影响。开发体验极差 期望：理想状态是把项目按业务拆分，每个业务只需要负责自己的功能模块，不与其他业务方有耦合。 解决方案：业界有比较成熟的架构方案–组件化，把业务模块独立出来，形成一个个业务组件。类似搭积">
+<meta property="og:type" content="article">
+<meta property="og:title" content="组件化-组件通信方案">
+<meta property="og:url" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="Autism的Blog">
+<meta property="og:description" content="背景组件化问题：随着业务的发展扩张，业务划分粒度越来越细，多个业务团队在同一个module里面修改&#x2F;维护代码的成本线性增加。合码冲突，bug率高，一个业务方改动代码，其他业务方都会受到不易被察觉的影响。开发体验极差 期望：理想状态是把项目按业务拆分，每个业务只需要负责自己的功能模块，不与其他业务方有耦合。 解决方案：业界有比较成熟的架构方案–组件化，把业务模块独立出来，形成一个个业务组件。类似搭积">
+<meta property="og:locale">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_1.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_2.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_3.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_4.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_5.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_6.png">
+<meta property="og:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_7.png">
+<meta property="og:image" content="http://www.autism-tl.cn/Users/tangliang/Documents/hexo/source/_posts/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_8.png">
+<meta property="article:published_time" content="2021-03-12T15:24:09.000Z">
+<meta property="article:modified_time" content="2021-04-04T15:32:03.000Z">
+<meta property="article:author" content="TL">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.autism-tl.cn/2021/03/12/组件化-组件通信方案/"/>
+
+
+
+
+
+  <title>组件化-组件通信方案 | Autism的Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Autism的Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">不算纯粹,但愿优雅</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/%E5%A4%B4%E5%83%8F.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Autism的Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">组件化-组件通信方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-12T23:24:09+08:00">
+                2021-03-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,225
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  9
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="组件化"><a href="#组件化" class="headerlink" title="组件化"></a>组件化</h3><p><strong>问题：</strong>随着业务的发展扩张，业务划分粒度越来越细，多个业务团队在同一个module里面修改/维护代码的成本线性增加。合码冲突，bug率高，一个业务方改动代码，其他业务方都会受到不易被察觉的影响。开发体验极差</p>
+<p><strong>期望：</strong>理想状态是把项目按业务拆分，每个业务只需要负责自己的功能模块，不与其他业务方有耦合。</p>
+<p><strong>解决方案：</strong>业界有比较成熟的架构方案–<strong>组件化</strong>，把业务模块独立出来，形成一个个业务组件。类似搭积木，每个业务组件都是积木，搭建在一起拼成App工程。<strong>独立出来的组件可以单独维护和升级而不会影响到其他的组件。</strong></p>
+<h3 id="组件通信"><a href="#组件通信" class="headerlink" title="组件通信"></a>组件通信</h3><p>各业务模块独立成组件之后，存在编译隔离，组件之间不能直接依赖。各业务间相互调用要怎么处理呢？</p>
+<ul>
+<li>安卓原生提供的方式类似广播、共享内存、intent等，开发与维护起来都非常麻烦</li>
+<li>业界通用的解决方法：EventBus的事件通知，组件服务化等。</li>
+</ul>
+<p><strong>事件通知</strong>明显的缺陷是代码上下文难以关联，堆栈的切换导致断点/追踪代码比较困难</p>
+<p><strong>组件服务化</strong>是指把业务组件拆分为api+impl，api层作为与其他组件通信媒介接口，真正的实现在impl层，外界依赖api层实现组件的通信。<strong>后文将根据此方法展开</strong></p>
+<h3 id="组件服务化方案设计："><a href="#组件服务化方案设计：" class="headerlink" title="组件服务化方案设计："></a><strong>组件服务化</strong>方案设计：</h3><p>方案一：全局工具类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;base-model</span><br><span class="line"></span><br><span class="line">object ServiceManager &#123;</span><br><span class="line"></span><br><span class="line">    val services: MutableMap&lt;Class&lt;*&gt;, Any&gt; &#x3D; HashMap()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;IUgcService  -- ugc-api</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;UgcServiceImpl  --  ugc-impl</span><br><span class="line"></span><br><span class="line">class BaseApplication : Application() &#123;</span><br><span class="line"></span><br><span class="line">    override fun onCreate() &#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;手动注册服务</span><br><span class="line"></span><br><span class="line">        ServiceManager.services.put(IUgcService::class.java, UgcServiceImpl())</span><br><span class="line"></span><br><span class="line">        ......</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>业务模块只需要依赖ServiceManager，传入api层对应的接口，就能获取实例了。但这种方案的缺点也很明显：</p>
+<ol>
+<li>实例不是懒加载，Service比较多的情况下会严重影响App启动速度</li>
+<li>模块代码对业务层(ugc-impl)存在依赖，无法解决编译隔离问题</li>
+</ol>
+<p>方案二：反射</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;base-model</span><br><span class="line"></span><br><span class="line">object ServiceManager &#123;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;注册</span><br><span class="line"></span><br><span class="line">    val servicesMap: MutableMap&lt;Class&lt;*&gt;, String&gt; &#x3D; HashMap()</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;实例缓存</span><br><span class="line"></span><br><span class="line">    private val servicesCache: MutableMap&lt;Class&lt;*&gt;, Any&gt; &#x3D; HashMap()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    fun &lt;T&gt; getService(mClass: Class&lt;T&gt;): T? &#123;</span><br><span class="line"></span><br><span class="line">        if (!servicesMap.containsKey(mClass)) &#123;</span><br><span class="line"></span><br><span class="line">            Log.e(&quot;ServiceManager&quot;, &quot;&#123;$mClass&#125; is not registered&quot; )</span><br><span class="line"></span><br><span class="line">            return null</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;取缓存</span><br><span class="line"></span><br><span class="line">        val impl &#x3D; servicesCache[mClass] as? T</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;反射获取实例</span><br><span class="line"></span><br><span class="line">        if (impl &#x3D;&#x3D; null) &#123;</span><br><span class="line"></span><br><span class="line">            try &#123;</span><br><span class="line"></span><br><span class="line">                val implClassName &#x3D; servicesMap[mClass]</span><br><span class="line"></span><br><span class="line">                val implClass &#x3D; Class.forName(implClassName!!)</span><br><span class="line"></span><br><span class="line">                val implInstance &#x3D; implClass.newInstance()</span><br><span class="line"></span><br><span class="line">                servicesCache[mClass] &#x3D; implInstance</span><br><span class="line"></span><br><span class="line">                impl &#x3D; implInstance as T?</span><br><span class="line"></span><br><span class="line">            &#125; catch (ignore: Throwable) &#123;</span><br><span class="line"></span><br><span class="line">                &#x2F;&#x2F; ignore</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return impl</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;IUgcService  -- ugc-api</span><br><span class="line"></span><br><span class="line">class BaseApplication : Application() &#123;</span><br><span class="line"></span><br><span class="line">    override fun onCreate() &#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;手动注册服务</span><br><span class="line"></span><br><span class="line">        ServiceManager.servicesMap.put(IUgcService::class.java, </span><br><span class="line"></span><br><span class="line">        &quot;com.bytedance.ugc.UgcServiceImpl&quot;)</span><br><span class="line"></span><br><span class="line">        ......</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用反射的方法实现懒加载并且解掉了对业务层代码的依赖，但带来其他的问题：</p>
+<ol>
+<li>注册时需要将类名以字符串的形式写入，类名变化时要同步修改注册逻辑，风险大，维护成本高</li>
+<li>反射创建实例影响性能</li>
+</ol>
+<p><strong>目标：</strong></p>
+<ul>
+<li>简化使用和配置</li>
+<li>编译隔离</li>
+<li>懒加载</li>
+<li>不反射</li>
+</ul>
+<h2 id="ServiceManager"><a href="#ServiceManager" class="headerlink" title="ServiceManager"></a>ServiceManager</h2><blockquote>
+<p>ServiceManager的核心思想：服务化，服务化就是一切面向接口，由接口提供服务，业务模块之间不直接耦合，通过约定好的接口进行访问。 简单来讲就是接口和实现分离。通过接口定义，明确组件、模块对外提供的能力。</p>
+</blockquote>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;1. 新写接口继承IService</span><br><span class="line"></span><br><span class="line">public interface IPreviewSearchDialogService extends IService &#123;</span><br><span class="line"></span><br><span class="line">    void showSearchDialog(Context context);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;2. 新写接口实现类, ServiceImpl注解作用于实现类</span><br><span class="line"></span><br><span class="line">@ServiceImpl</span><br><span class="line"></span><br><span class="line">class PreviewSearchDialogServiceImpl : IPreviewSearchDialogService &#123;</span><br><span class="line"></span><br><span class="line">    override fun showSearchDialog(context: Context)) &#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;do something</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;3. 通过ServiceManager获取实例   或直接用kotlin扩展方法getService()</span><br><span class="line"></span><br><span class="line">ServiceManager.getService(IPreviewSearchDialogService.class)?.showSearchDialog(context)</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="ServiceManager源码分析"><a href="#ServiceManager源码分析" class="headerlink" title="ServiceManager源码分析"></a>ServiceManager源码分析</h3><p>ServiceManager.getService：</p>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_1.png" alt="img"></p>
+<p>完成简化配置、编译隔离、懒加载、不反射等目标的关键点在ServiceFinder中，查看ServiceFinder源码</p>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_2.png" alt="img"></p>
+<p>要查看ServiceFinder.findService方法中动态注入的代码，需要找到ServiceFinder类在apk中的字节码</p>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_3.png" alt="img"></p>
+<p>可以看到findService方法把所有的IService -&gt; ServiceImpl的映射保存了，并返回了ServiceImpl的实例</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>工程结构清晰，整体不超过30个文件，代码大部分内容是<strong>APT、Transform + ASM</strong>操作</p>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_4.png" alt="img"></p>
+<h4 id="APT："><a href="#APT：" class="headerlink" title="APT："></a><strong>APT：</strong></h4><blockquote>
+<p>APT(Annotation Processing Tool)：注解处理器是javac(java compiler)中处理Annotation注解的工具。是编译期间构建完AST（抽象语法树）之后进行的，通过APT我们可以对注解（自定义注解、系统注解）做相应的处理。例如读取注解的值，读取被注解标记的类的类型、泛型、父类，读取被注解标记的属性等。通常是用APT+Javapoet生成java代码类，生成的类也会参与javac的编译。</p>
+</blockquote>
+<p><strong>ServiceProcessor解析：</strong></p>
+<ol>
+<li>筛选接口：ServiceProcessor遍历被@ServiceImpl标记类的所有接口，筛选出其中<strong>直接</strong>继承IService的接口进行下一步操作</li>
+<li>构造newInstance方法：遍历标记类中所有子元素，查找是否仅存在一个被@ServiceImplFactory注解的静态可见构造方法。如果有就返回此静态方法，否则返回默认空参数构造方法</li>
+<li>构造collectService方法：将继承IService的接口作为key，其实现类作为value，以类名字符串的形式put到一个map中</li>
+<li>构造代理类：在接口的包路径下生成名称为{接口名}_ServiceProxy的类，继承自IServiceProxy接口，并实现newInstance和collectService方法</li>
+</ol>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_5.png" alt="img"></p>
+<h4 id="Gradle-Transform"><a href="#Gradle-Transform" class="headerlink" title="Gradle Transform"></a><strong>Gradle Transform</strong></h4><p><strong>Gradle基础：</strong></p>
+<blockquote>
+<p>Gradle是专注于灵活性和性能的开源构建自动化工具</p>
+</blockquote>
+<blockquote>
+<p><strong>Project</strong>和<strong>Task</strong>是Gradle最重要的两个概念：一个项目(Project)可以是用来构建Jar、aar、Apk，通常由一个或者多个Task组成。Task代表着构建执行中的一个原子操作，比如说编译class，生成apk等。Task之间可以通过dependsOn、mustRunAfter等方法添加依赖关系</p>
+</blockquote>
+<p>所有的Gradle Task的执行都会经过三个阶段：</p>
+<ol>
+<li>初始化阶段：初始化项目环境，执行settings.gradle确定有哪些项目参与构建</li>
+<li>配置阶段：执行所有项目的build.gradle文件，创建&amp;配置Task，梳理Task依赖形成一个有向无环图</li>
+<li>执行阶段：按照之前配置好的顺序执行Task</li>
+</ol>
+<p>./gradlew assembleDebug也走了这三个阶段</p>
+<p><strong>Gradle插件：</strong></p>
+<p>Gradle插件是一组可复用的构建逻辑，有脚本插件[apply from:  project.file(xxx.gradle)]和对象插件[apply plugin : xxx]两种，主要用来获取项目构建中的各种信息，干预项目构建流程，增加自定义逻辑</p>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_6.png" alt="img"></p>
+<p>对象插件在根build.grade文件的buildscript中通过classpath依赖</p>
+<p><strong>Transform介绍</strong></p>
+<blockquote>
+<p>Gradle Transform是Android官方提供给开发者在项目构建阶段由class到dex转换期间修改class文件的一套api。目前经典的应用就是字节码插桩和代码注入技术。有了这个API，我们就可以根据自己的业务需求做一些定制。</p>
+</blockquote>
+<p>我们可以通过Gradle插件来注册我们编写的Transform。注册后的Transform会被Gradle包装成一个Gradle Task，这个TransForm Task会在javac Task执行完毕后运行。</p>
+<p><strong>ASM介绍</strong>：ASM是一个通用的Java字节码操作和分析框架。 它可以以二进制形式修改现有类或动态生成类。</p>
+<p><strong>ServiceMergeTransform解析：</strong></p>
+<ol>
+<li>拦截所有以_ServiceProxy结尾的代码类，解析出map和静态构造方法</li>
+<li>根据mira extension判断是否为插件打包</li>
+<li>插件打包：校验接口的包名是否与插件的包名/手动添加的包名一致，校验完成后直接return</li>
+<li>非插件打包：通过ASM把解析出的map和静态构造方法(无静态构造方法则用默认无参构造方法)以字节码的形式插入到ServiceFinder.findService中，Java代码类似下图</li>
+</ol>
+<p><img src="/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_7.png" alt="img"></p>
+<h4 id="在插件中如何运作？"><a href="#在插件中如何运作？" class="headerlink" title="在插件中如何运作？"></a><strong>在插件中如何运作？</strong></h4><ul>
+<li>插件和宿主依赖同一个库时，插件中的依赖会自动转为compileOnly。所以插件apk中是不存在ServiceManager和ServiceFinder的，插件运行时用的是宿主中的类</li>
+<li>故打插件apk会通过APT生成代理类，但不会通过Transform往ServiceFinder(插件中无此类)注入代码</li>
+<li>插件中调用ServiceManager.getService执行的是最后一段代码，通过反射在APT过程中生成的代理类，调用代理类的newInstance方法返回实现类的实例</li>
+</ul>
+<p><img src="/Users/tangliang/Documents/hexo/source/_posts/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/image_8.png" alt="img"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    TL
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/" title="组件化-组件通信方案">http://www.autism-tl.cn/2021/03/12/%E7%BB%84%E4%BB%B6%E5%8C%96-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1%E6%96%B9%E6%A1%88/</a>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/12/23/%E6%8F%92%E4%BB%B6%E5%8C%96-Android%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90/" rel="next" title="插件化-Android资源解析">
+                <i class="fa fa-chevron-left"></i> 插件化-Android资源解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/" rel="prev" title="十分钟了解Android依赖关系">
+                十分钟了解Android依赖关系 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/%E5%A4%B4%E5%83%8F.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AutismTl" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E5%8C%96"><span class="nav-number">1.1.</span> <span class="nav-text">组件化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1"><span class="nav-number">1.2.</span> <span class="nav-text">组件通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%8C%96%E6%96%B9%E6%A1%88%E8%AE%BE%E8%AE%A1%EF%BC%9A"><span class="nav-number">1.3.</span> <span class="nav-text">组件服务化方案设计：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ServiceManager"><span class="nav-number">2.</span> <span class="nav-text">ServiceManager</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">使用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceManager%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">2.2.</span> <span class="nav-text">ServiceManager源码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#APT%EF%BC%9A"><span class="nav-number">2.3.1.</span> <span class="nav-text">APT：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradle-Transform"><span class="nav-number">2.3.2.</span> <span class="nav-text">Gradle Transform</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E6%8F%92%E4%BB%B6%E4%B8%AD%E5%A6%82%E4%BD%95%E8%BF%90%E4%BD%9C%EF%BC%9F"><span class="nav-number">2.3.3.</span> <span class="nav-text">在插件中如何运作？</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+<a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">粤ICP备14057991号</a> 
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TL</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
