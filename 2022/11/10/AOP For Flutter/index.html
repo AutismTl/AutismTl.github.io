@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/icon.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/icon.png?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Flutter," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="AOP：什么是AOP Aspect Oriented Programming，面向切面编程，通过预编译方式和运行期间动态代理实现程序功能统一维护的一种技术。是对OOP（Object-Oriented Programing，面向对象编程）的补充和完善。OOP引入封装、继承和多态性等概念来建立一种对象层次结构，而当我们需要为分散的对象引入公共行为的时候，OOP则显得捉襟见肘。  AOP能做什么AOP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AOP For Flutter">
+<meta property="og:url" content="http://www.autism-tl.cn/2022/11/10/AOP%20For%20Flutter/index.html">
+<meta property="og:site_name" content="Autism的Blog">
+<meta property="og:description" content="AOP：什么是AOP Aspect Oriented Programming，面向切面编程，通过预编译方式和运行期间动态代理实现程序功能统一维护的一种技术。是对OOP（Object-Oriented Programing，面向对象编程）的补充和完善。OOP引入封装、继承和多态性等概念来建立一种对象层次结构，而当我们需要为分散的对象引入公共行为的时候，OOP则显得捉襟见肘。  AOP能做什么AOP">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-11-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-15T09:02:57.979Z">
+<meta property="article:author" content="TL">
+<meta property="article:tag" content="Flutter">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.autism-tl.cn/2022/11/10/AOP For Flutter/"/>
+
+
+
+
+
+  <title>AOP For Flutter | Autism的Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Autism的Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">不算纯粹,但愿优雅</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.autism-tl.cn/2022/11/10/AOP%20For%20Flutter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/%E5%A4%B4%E5%83%8F.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Autism的Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AOP For Flutter</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-10T00:00:00+08:00">
+                2022-11-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2,716
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<h2 id="AOP："><a href="#AOP：" class="headerlink" title="AOP："></a>AOP：</h2><h3 id="什么是AOP"><a href="#什么是AOP" class="headerlink" title="什么是AOP"></a>什么是AOP</h3><blockquote>
+<p>Aspect Oriented Programming，面向切面编程，通过预编译方式和运行期间动态代理实现程序功能统一维护的一种技术。是对OOP（Object-Oriented Programing，面向对象编程）的补充和完善。OOP引入封装、继承和多态性等概念来建立一种对象层次结构，而当我们需要为分散的对象引入公共行为的时候，OOP则显得捉襟见肘。</p>
+</blockquote>
+<h3 id="AOP能做什么"><a href="#AOP能做什么" class="headerlink" title="AOP能做什么"></a>AOP能做什么</h3><p>AOP是一个被严重忽视的技术点，它可以用<strong>无侵入</strong> 的 <strong>横向拓展</strong><br>向现存的代码增加（weaving织入）<strong>额外的行为</strong>而不修改代码本身。业务开发中可以从一些系统级关注点(例如日志、性能)中脱离，与系统级/通用业务<strong>解耦</strong>，只需要关心业务逻辑本身。</p>
+<p>理论上系统级的业务或框架都可以有AOP的介入：</p>
+<ul>
+<li>无痕埋点</li>
+<li>日志记录</li>
+<li>覆盖率插桩</li>
+<li>点击防抖</li>
+<li>权限控制</li>
+<li>性能统计(方法耗时)</li>
+<li>热修复</li>
+<li>组件化解耦、组件通信</li>
+<li>……</li>
+</ul>
+<p>包括业界常用的一些工具库也都有AOP的身影，例如安卓常用框架：DataBinding、Dagger2、ButterKnife、EventBus3等。</p>
+<p><strong>小结：当用常规方式开发有难度或者不优雅时，不妨用AOP的编程方式想想</strong></p>
+<h2 id="Android常用AOP方式与应用"><a href="#Android常用AOP方式与应用" class="headerlink" title="Android常用AOP方式与应用"></a>Android常用AOP方式与应用</h2><p><strong>安卓大致编译打包流程：</strong></p>
+<p>![image-20210403213115055](AOP For Flutter/0.png)</p>
+<p>在整个编译打包流程中，官方提供apt和transform两个切入方式让开发者做AOP编程。其中apt阶段可以读取解析注解生成新类但不能修改现有类，transform阶段可以直接修改字节码能生成新类或者修改现有类。</p>
+<h3 id="APT："><a href="#APT：" class="headerlink" title="APT："></a>APT：</h3><blockquote>
+<p>APT(Annotation Processing Tool)：注解处理器是javac(java compiler)中处理Annotation注解的工具。是编译期间构建完AST（抽象语法树）之后进行的，通过APT我们可以对注解（自定义注解、系统注解）做相应的处理。例如读取注解的值，读取被注解标记的类的类型、泛型、父类，读取被注解标记的属性等。通常是用APT+Javapoet生成java代码类，生成的类也会参与javac的编译。</p>
+</blockquote>
+<h3 id="Gradle-Transform"><a href="#Gradle-Transform" class="headerlink" title="Gradle Transform"></a>Gradle Transform</h3><p><strong>Gradle基础：</strong>Gradle是专注于灵活性和性能的开源构建自动化工具。<br>Project和Task是Gradle最重要的两个概念：一个项目(Project)可以是用来构建Jar、aar、Apk，通常由一个或者多个Task组成。Task代表着构建执行中的一个原子操作，比如说编译class，生成apk等。Task之间可以通过dependsOn、mustRunAfter等方法添加依赖关系。<br><br>所有的Gradle Task的执行都会经过三个阶段（例如./gradlew assembleDebug也走了这三个阶段）：</p>
+<ol>
+<li>初始化阶段：初始化项目环境，执行settings.gradle确定有哪些项目参与构建</li>
+<li>配置阶段：执行所有项目的build.gradle文件，创建&amp;配置Task，梳理Task依赖形成一个有向无环图</li>
+<li>执行阶段：按照之前配置好的顺序执行Task</li>
+</ol>
+<p><strong>Gradle Plugin：</strong><br>Gradle插件是一组可复用的构建逻辑，有脚本插件[apply from: xxx)]和对象插件[apply plugin : xxx]两种，主要用来获取项目构建中的各种信息，干预项目构建流程，增加自定义逻辑。Flutter的构建流程也是通过脚本插件flutter.gradle嵌入FlutterPlugin实现</p>
+<p>![image-20210403213115055](AOP For Flutter/1.webp)</p>
+<p><strong>Transform：</strong></p>
+<blockquote>
+<p>Gradle Transform是Android官方提供给开发者在项目构建阶段由class到dex转换期间修改class文件的一套API。目前经典的应用就是字节码插桩和代码注入技术。有了这个API，我们就可以根据自己的业务需求做一些定制。</p>
+</blockquote>
+<p>我们可以通过Gradle插件来注册我们编写的Transform。注册后的Transform会被Gradle包装成一个Gradle Task，这个TransForm Task会在javac Task执行完毕后运行。</p>
+<p><strong>ASM介绍：</strong>ASM是一个通用的Java字节码操作和分析框架。 它可以以二进制形式修改现有类或动态生成类。使用ASM修改字节码，需要对class字节码文件的格式以及JVM的执行模型有一定的了解，限于篇幅，这里不展开介绍。</p>
+<h3 id="AOP实践-组件通信"><a href="#AOP实践-组件通信" class="headerlink" title="AOP实践-组件通信"></a>AOP实践-组件通信</h3><p>各业务模块独立成组件之后，存在编译隔离，组件之间不能直接依赖。各业务间相互调用要怎么处理呢？<br><br>安卓原生提供的方式类似广播、共享内存、intent等，开发与维护起来都非常麻烦<br><br>业界通用的解决方法：EventBus的事件通知，组件服务化等。</p>
+<p><strong>事件通知</strong> 明显的缺陷是代码上下文难以关联，堆栈的切换导致断点/追踪代码比较困难<br><br><strong>组件服务化</strong> 是指把业务组件拆分为api+impl，api层作为与其他组件通信媒介接口，真正的实现在impl层，外界依赖api层实现组件的通信。</p>
+<p><strong>组件服务化方案设计：</strong></p>
+<p>方案一：全局工具类<br>![enter image description here](AOP For Flutter/2.webp)</p>
+<p>业务模块只需要依赖ServiceManager(base-model)，传入api层对应的接口，就能获取实例了。但这种方案的缺点也很明显：</p>
+<ol>
+<li>实例不是懒加载，Service比较多的情况下会严重影响App启动速度</li>
+<li>模块代码对业务层(ugc-impl)存在依赖，无法解决编译隔离问题</li>
+</ol>
+<p>方案二：反射</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;base-model</span><br><span class="line"></span><br><span class="line">object ServiceManager &#123;</span><br><span class="line">	  &#x2F;&#x2F;注册</span><br><span class="line">	val servicesMap: MutableMap&lt;Class&lt;*&gt;, String&gt; &#x3D; HashMap()</span><br><span class="line"></span><br><span class="line"> 	&#x2F;&#x2F;实例缓存</span><br><span class="line">	private val servicesCache: MutableMap&lt;Class&lt;*&gt;, Any&gt; &#x3D; HashMap()</span><br><span class="line"></span><br><span class="line">	fun &lt;T&gt; getService(mClass: Class&lt;T&gt;): T? &#123;</span><br><span class="line">		if (!servicesMap.containsKey(mClass)) &#123;</span><br><span class="line">			 Log.e(&quot;ServiceManager&quot;, &quot;&#123;$mClass&#125; is not registered&quot; )</span><br><span class="line"> 			return null</span><br><span class="line"> 		&#125;</span><br><span class="line"></span><br><span class="line">		 &#x2F;&#x2F;取缓存</span><br><span class="line">		val impl &#x3D; servicesCache[mClass] as? T</span><br><span class="line">		&#x2F;&#x2F;反射获取实例</span><br><span class="line">		if (impl &#x3D;&#x3D; null) &#123;</span><br><span class="line">		try &#123;</span><br><span class="line">			val implClassName &#x3D; servicesMap[mClass]</span><br><span class="line">			val implClass &#x3D; Class.forName(implClassName!!)</span><br><span class="line">			val implInstance &#x3D; implClass.newInstance()</span><br><span class="line">			servicesCache[mClass] &#x3D; implInstance</span><br><span class="line">			impl &#x3D; implInstance as T?</span><br><span class="line">		&#125; catch (ignore: Throwable) &#123;</span><br><span class="line"> 			&#x2F;&#x2F; ignore</span><br><span class="line">		&#125;</span><br><span class="line"> 		&#125;</span><br><span class="line"> 	return impl</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;IUgcService  -- ugc-api</span><br><span class="line"></span><br><span class="line">class BaseApplication : Application() &#123;</span><br><span class="line"></span><br><span class="line">override fun onCreate() &#123;</span><br><span class="line"></span><br><span class="line">   &#x2F;&#x2F;手动注册服务</span><br><span class="line"></span><br><span class="line">   ServiceManager.servicesMap.put(IUgcService::class.java, </span><br><span class="line"></span><br><span class="line">   &quot;com.bytedance.ugc.UgcServiceImpl&quot;)</span><br><span class="line"></span><br><span class="line">   ......</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用反射的方法实现懒加载并且解掉了对业务层代码的依赖，但带来其他的问题：</p>
+<ol>
+<li>注册时需要将类名以字符串的形式写入，类名变化时要同步修改注册逻辑，风险大，维护成本高</li>
+<li>反射创建实例影响性能</li>
+</ol>
+<p>** 目标：**</p>
+<ul>
+<li>简化使用和配置</li>
+<li>编译隔离</li>
+<li>懒加载</li>
+<li>不反射</li>
+</ul>
+<p><strong>通过APT、Transform + ASM实现组件间通信框架：<br></strong><br>![javac.png](AOP For Flutter/3.webp)</p>
+<h2 id="Flutter如何做AOP"><a href="#Flutter如何做AOP" class="headerlink" title="Flutter如何做AOP"></a>Flutter如何做AOP</h2><p>由安卓的AOP思路我们不难看出，要找到flutter的aop编程的方式，需要分析flutter的编译打包流程，从中寻找切入方式</p>
+<h3 id="Flutter编译产物变化"><a href="#Flutter编译产物变化" class="headerlink" title="Flutter编译产物变化:"></a>Flutter编译产物变化:</h3><p>![enter image description here](AOP For Flutter/4.webp)</p>
+<h3 id="app-dill介绍："><a href="#app-dill介绍：" class="headerlink" title="app.dill介绍："></a>app.dill介绍：</h3><p>编译流程中<code>flutter_tools</code>会调用<code>frontend_server</code>来把Dart代码文件编译成名为 <code>app.dill</code> 的kernel文件（kernel文件格式是由Dart定义的一种特殊数据格式，Dart虚拟机会以解释方式来执行它）。<br><br>我们可以在工程根目录的.dart_tool/flutter_build下找到编译生成的app.dill文件，这个文件代表了项目所有dart代码编译后的kernel格式。dill文件本身是不可读的，我们可以下载对应本地环境的dart-sdk源码，利用源码中的 pkg/vm/dump_kernel.dart来将dill文件转换为可读的文件。命令：<br><br>![enter image description here](AOP For Flutter/5.webp)</p>
+<p>这样就把app.dill文件转换为可读的app.txt文件，作用与.class文件类似，把语法和代码做了压缩优化，文件部分内容如下，</p>
+<p>![enter image description here](AOP For Flutter/6.webp)</p>
+<p><strong>AOP切入方式：</strong>Dart提供了一种Kernel to Kernel Transform的方式，可以通过对dill文件的递归式AST遍历，实现对Dill内容的修改、添加等操作。<br><br>AST数据结构：Componet-&gt;Library-&gt;classes、fields、reference、typedefs…(Component中包含了我们app的所有的Library，一个Library对应我们flutter项目中的一个dart文件)<br>。一个简单的Demo来实现对AST的修改：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">void main() &#123;</span><br><span class="line">  final String path &#x3D;&#39; &#x2F;Users&#x2F;tangliang&#x2F;Desktop&#x2F;app.dill&#39;;</span><br><span class="line">  Component component &#x3D; readComponent(path);</span><br><span class="line">  MethodTransformer transformer &#x3D; MethodTransformer();  &#x2F;&#x2F;自定义Transformer</span><br><span class="line">  component.libraries.forEach((element) &#123;  &#x2F;&#x2F;遍历所有dart文件</span><br><span class="line">    if (element.reference.canonicalName.name &#x3D;&#x3D; &#39;package:main.dart&#39;) &#123;</span><br><span class="line">      transformer.visitLibrary(element);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  writeComponent(path, component);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更多AST遍历和修改操作，限于篇幅这里不做展开，业内有相关开源框架可以参阅<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzIyMTg0OTExOQ==&mid=2247486207&idx=2&sn=520474e581fce9df1523e963c42ea709&chksm=e837398fdf40b0998190de240ae81d02b8731ae7bbc157ec3bab98345ea9fae250091deac11c&scene=27#wechat_redirect">AspectD</a> </p>
+<p><strong>这些操作暂未对开发者提供API，我们需要对Flutter源码做一些hook才能插入我们自己的Transformer</strong></p>
+<h3 id="如何插入自定义Transformer"><a href="#如何插入自定义Transformer" class="headerlink" title="如何插入自定义Transformer"></a>如何插入自定义Transformer</h3><p>![enter image description here](AOP For Flutter/7.webp)<br><br>查阅flutter源码(<code>2.5.0版本</code>)，dill文件(kernel数据格式)是由 <code>flutter_tool</code>调用命令flutter build来编译产出，我们来看下flutter build做了些什么<br>![build.png](AOP For Flutter/8.webp)</p>
+<p>可以看到不管IOS还是安卓，最终都是通过调用命令启动虚拟机中的<code>frontend_server.dart.snapshot</code>去生成dill文件，<code>frontend_server.dart.snapshot</code> 不同于之前的 <code>flutter_tool</code> ，他是存在于<a target="_blank" rel="noopener" href="https://links.jianshu.com/go?to=https://github.com/flutter/engine">flutter engine</a>的Dart代码中的，而不是Flutter SDK中，入口是engine/flutter_frontend_server/bin/starter.dart<br><br>Transformer的注入和执行也是在这个阶段，我们想插入自己Transformer，需要对flutter_frontend_server做hook，但flutter_frontend_server是engine里面的代码，我们很难低成本的去修改engine，这个时候要怎么办呢<br><br>我们可以往前看，flutter_frontend_server之前的调用流程都是在Flutter SDK里面的，我们可以对Flutter SDK做Hook。</p>
+<p>方案简述：自己写(复制)一份!!#6aa84f flutter_frontend_server!!并注入自定义的transformer，然后对本地的flutter sdk提交一个对<code>KernelSnapshot</code>做hook修改的patch（修改路径，用自己的!!#6aa84f flutter_frontend_server!!替换掉engine里面的flutter_frontend_server），这样我们的自定义transformer就能生效了。<br></p>
+<p>详细代码限于篇幅不做展开，业内已有开源项目，可参阅<a target="_blank" rel="noopener" href="https://github.com/XianyuTech/aspectd">AspectD源码</a> （注：flutter sdk不同版本需要提交的patch会不一致，本文基于<code>2.5.0</code>版本分析）</p>
+<h2 id="结语："><a href="#结语：" class="headerlink" title="结语："></a>结语：</h2><ul>
+<li>本文借鉴于Android的AOP编程，探索学习Flutter的AOP编程方式。由于Flutter暂未提供官方的AOP方式，业内现有的实现方式多少会有一些trick，故本文更多的是探讨AOP的思路和原理而非实现。<br></li>
+<li>咸鱼开源的aspectD需要对flutter sdk源码hook修改，并且不同的flutter版本需要做不同的适配，目前看flutter2.2.0以上暂未做适配。<br></li>
+<li>AOP算是应用开发过程中必要的底层能力，当下流行的大前端应用层或多或少都有对应的AOP方式，相信google也会在不久的将来对Flutter提供官方AOP支持。</li>
+</ul>
+<p><strong>参考资料</strong>：<br><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/4e8ccb02e92d">https://www.jianshu.com/p/4e8ccb02e92d</a><br><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/yunqiinsight/article/details/92814036">https://blog.csdn.net/yunqiinsight/article/details/92814036</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    TL
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://www.autism-tl.cn/2022/11/10/AOP%20For%20Flutter/" title="AOP For Flutter">http://www.autism-tl.cn/2022/11/10/AOP%20For%20Flutter/</a>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flutter/" rel="tag"># Flutter</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/26/%E5%8D%81%E5%88%86%E9%92%9F%E4%BA%86%E8%A7%A3Android%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB/" rel="next" title="十分钟了解Android依赖关系">
+                <i class="fa fa-chevron-left"></i> 十分钟了解Android依赖关系
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/%E5%A4%B4%E5%83%8F.png"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/AutismTl" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#AOP%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">AOP：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFAOP"><span class="nav-number">1.1.</span> <span class="nav-text">什么是AOP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOP%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.</span> <span class="nav-text">AOP能做什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android%E5%B8%B8%E7%94%A8AOP%E6%96%B9%E5%BC%8F%E4%B8%8E%E5%BA%94%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">Android常用AOP方式与应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#APT%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">APT：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradle-Transform"><span class="nav-number">2.2.</span> <span class="nav-text">Gradle Transform</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOP%E5%AE%9E%E8%B7%B5-%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1"><span class="nav-number">2.3.</span> <span class="nav-text">AOP实践-组件通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flutter%E5%A6%82%E4%BD%95%E5%81%9AAOP"><span class="nav-number">3.</span> <span class="nav-text">Flutter如何做AOP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flutter%E7%BC%96%E8%AF%91%E4%BA%A7%E7%89%A9%E5%8F%98%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">Flutter编译产物变化:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#app-dill%E4%BB%8B%E7%BB%8D%EF%BC%9A"><span class="nav-number">3.2.</span> <span class="nav-text">app.dill介绍：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%8F%92%E5%85%A5%E8%87%AA%E5%AE%9A%E4%B9%89Transformer"><span class="nav-number">3.3.</span> <span class="nav-text">如何插入自定义Transformer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD%EF%BC%9A"><span class="nav-number">4.</span> <span class="nav-text">结语：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TL</span>
+  <a href="https://beian.miit.gov.cn/" target="_blank">湘ICP备16017043号-1</a>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
