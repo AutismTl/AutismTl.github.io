@@ -281,6 +281,164 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.autism-tl.cn/2017/05/20/Android%E4%B8%AD%E7%9A%84Window%E4%B8%8EWindowManager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/%E5%A4%B4%E5%83%8F.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無恙。">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/05/20/Android%E4%B8%AD%E7%9A%84Window%E4%B8%8EWindowManager/" itemprop="url">Android中的Window与WindowManager</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-20T00:00:00+08:00">
+                2017-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1,358
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  6
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <hr>
+<h2 id="Window"><a href="#Window" class="headerlink" title="Window"></a>Window</h2><p>Android中的所有视图，不管是Activity、Dialog还是Toast都是通过Window来呈现的，它们的视图都是附加在Window上面的，Window实际是View的直接管理者。<br>Window是一个抽象类，它的具体实现是PhoneWindow，WindowManager是外界访问Window的入口，Window的具体实现位于WindowManagerService中，WindowManger与WindowMangerService的交互其实是个IPC过程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mFloatingButton=<span class="keyword">new</span> Button(<span class="keyword">this</span>);</span><br><span class="line">mFloatingButton.setText(<span class="string">&quot;button&quot;</span>);</span><br><span class="line">mLayoutParams=<span class="keyword">new</span> WindowManger.LayoutParams(</span><br><span class="line">            LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT,<span class="number">0</span>,<span class="number">0</span>,</span><br><span class="line">            PixlFormat.TRANSAPARENT);</span><br><span class="line">mLayoutParams.flags=LayoutParams.FLAG_NOT_TOUCH_MODAL|LayoutParams.FLAG_NOT_FOCUSABLE</span><br><span class="line">                    |LaoutParams.FLAG_SHOW_WHEN_FOCUSABLE;</span><br><span class="line">mLayoutParams.x=<span class="number">100</span>;</span><br><span class="line">mLayoutParams.y=<span class="number">200</span>;</span><br><span class="line">mWindowManger.addView(mFloatingButton,mLayoutParams);</span><br></pre></td></tr></table></figure>
+<p>上述代码可以将一个Button添加到屏幕坐标为(100,200)的位置上。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/20/Android%E4%B8%AD%E7%9A%84Window%E4%B8%8EWindowManager/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://www.autism-tl.cn/2017/04/21/Android-ImageView%E5%9B%BE%E7%89%87%E8%87%AA%E9%80%82%E5%BA%94/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1596,7 +1754,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">19</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1663,7 +1821,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

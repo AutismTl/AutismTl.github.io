@@ -1007,4 +1007,138 @@
         <tag>Android</tag>
       </tags>
   </entry>
+  <entry>
+    <title></title>
+    <url>/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="小程序框架源码浅析"><a href="#小程序框架源码浅析" class="headerlink" title="小程序框架源码浅析"></a><strong>小程序框架源码浅析</strong></h1><h2 id="小程序底层框架"><a href="#小程序底层框架" class="headerlink" title="小程序底层框架"></a><strong>小程序底层框架</strong></h2><h3 id="双线程模型"><a href="#双线程模型" class="headerlink" title="双线程模型"></a><strong>双线程模型</strong></h3><p><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/1.png" alt="img">        </p>
+<p>​        </p>
+<table>
+<thead>
+<tr>
+<th><strong>运行环境</strong></th>
+<th><strong>逻辑层(JS引擎)</strong></th>
+<th><strong>渲染层(渲染引擎)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Android</td>
+<td>V8</td>
+<td>Chromium 定制内核</td>
+</tr>
+<tr>
+<td>iOS</td>
+<td>JavaScriptCore</td>
+<td>WKWebView</td>
+</tr>
+<tr>
+<td>小程序开发者工具</td>
+<td>NWJS</td>
+<td>Chrome WebView</td>
+</tr>
+</tbody></table>
+<h2 id="逆向技巧：查看小程序源码"><a href="#逆向技巧：查看小程序源码" class="headerlink" title="逆向技巧：查看小程序源码"></a><strong>逆向技巧：查看小程序源码</strong></h2><h3 id="1、获取小程序基础库wxvpkg包-微信开发者工具"><a href="#1、获取小程序基础库wxvpkg包-微信开发者工具" class="headerlink" title="1、获取小程序基础库wxvpkg包(**微信开发者工具**)"></a><strong>1、获取小程序基础库wxvpkg包(**</strong>微信开发者工具**<strong>)</strong></h3><p>想要获取小程序的源码需要先拿到小程序的应用包，最简单的包获取方式是在<strong>微信开发者工具</strong>中的基础库包 </p>
+<ol>
+<li>把终端的对象切换为top，输入help()可以查看工具提供的一些方法： </li>
+</ol>
+<p><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/2.png" alt="img"></p>
+<ol start="2">
+<li>输入openVendor()打开所有下载过的基础库版本的目录                  <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/3.png" alt="img">        </li>
+</ol>
+<ul>
+<li><p>wcsc：将 wxss 转为 view 模块使用的 css 代码 </p>
+</li>
+<li><p>wcc：将 wxml 转为 view 模块使用的 js 代码</p>
+</li>
+<li><p>wxvpkg：基础库包(微信开发者工具使用) </p>
+</li>
+</ul>
+<h3 id="2、获取安卓手机的小程序wxapkg包"><a href="#2、获取安卓手机的小程序wxapkg包" class="headerlink" title="2、获取安卓手机的小程序wxapkg包"></a><strong>2、获取安卓手机的小程序wxapkg包</strong></h3><p>众所周知，开源的安卓系统可以做到很多其他平台做不到的黑科技。 </p>
+<p>其实只要拿到了ROOT权限，我们就可以对手机”为所欲为”。 </p>
+<p>不一定每个人都用安卓手机，并且真机刷ROOT比较麻烦(有几率变砖块)，我们最好用安卓模拟器去操作 </p>
+<ol>
+<li><p>打开”夜神模拟器”的ROOT权限，下载<a href="https://jiazhang.qq.com/static/utils/rootexplorer.apk">文件管理器</a></p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/4.png" alt="img">        登录微信并打开想要逆向的小程序应用，微信客户端会下载对应的小程序包到data/data/com.tencent.mm/microMsg/xxxxxxxxxx长字符串/appbrand/pkg目录下(无ROOT权限只能查看到/sdcard目录) </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/5.png" alt="img">        长按文件选择压缩=&gt;发送压缩文件到微信 </p>
+</li>
+</ol>
+<h3 id="3、解包小程序基础库"><a href="#3、解包小程序基础库" class="headerlink" title="3、解包小程序基础库"></a><strong>3、解包小程序基础库</strong></h3><ol>
+<li><p>利用wxappUnpacker解包工具解析wxapkg格式的包文件(微信开发中工具获取的wx<strong>v</strong>pkg包需把后缀改成wx<strong>a</strong>pkg)，得到压缩混淆后的基础库源码 </p>
+</li>
+<li><p>​    <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/6.png" alt="img">        webstorm打开源码工程，利用webstorm的格式化得到勉强能阅读的代码                  <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/7.png" alt="img">        小程序基础库用JavaScript编写，其中WAServiece 就是逻辑层代码，WAWebview 是渲染层代码，他们会被注入到平台对应的渲染层和逻辑层环境中运行 </p>
+</li>
+</ol>
+<h3 id="4、反编译微信app获取小程序基础库代码"><a href="#4、反编译微信app获取小程序基础库代码" class="headerlink" title="4、反编译微信app获取小程序基础库代码"></a><strong>4、反编译微信app获取小程序基础库代码</strong></h3><p>利用安卓反编译工具解包微信apk，在wxa_library目录下可以找到小程序基础库的js代码以及其他注入代码</p>
+<h2 id><a href="#" class="headerlink" title></a><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/8.png" alt="img"></h2><h2 id="部分源码浅析"><a href="#部分源码浅析" class="headerlink" title="部分源码浅析"></a><strong>部分源码浅析</strong></h2><h3 id="setTimeout在安卓中的实现"><a href="#setTimeout在安卓中的实现" class="headerlink" title="setTimeout在安卓中的实现"></a><strong>setTimeout在安卓中的实现</strong></h3><ul>
+<li><p>我们反编译wx的apk，在appbrand包目录下可以找到setTimeout、setInterval等定时器方法的注入代码（V8 本身是不提供 setTimeout 和 setInterval，它们不是ECMAScript 的一部分） </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/9.png" alt="img">        可以通过registerJavaMethod方法搜索有哪些小程序方法是通过注入Java对象方式实现的。例如console.log… </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/10.png" alt="img">        J2V8是基于 jni 实现了 Java 对 V8 的封装，微信内部改写了J2V8。 </p>
+</li>
+<li><p>v8Object是定义了众多Java方法实现的对象，最终会通过addJavascriptInterface注入到JS引擎中。 </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/11.png" alt="img">        addJavascriptInterface的作用是在WebView中注入Java对象，供给JS端通过JSBridge调用Android端的方法。 </p>
+</li>
+<li><p>所以registerJavaMethod中JavaCallback的实现就是最终小程序setTimeout方法的实现 </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/12.png" alt="img">        setTimeout方法具体实现：解析参数封装成runnable，send到安卓handle中处理(handle对应的loop是小程序运行线程V8JSRuntimeLooper) </p>
+</li>
+</ul>
+<h3 id="cameraContext-onCameraFrame的背压卡顿问题"><a href="#cameraContext-onCameraFrame的背压卡顿问题" class="headerlink" title="cameraContext.onCameraFrame的背压卡顿问题"></a><strong>cameraContext.onCameraFrame的背压卡顿问题</strong></h3><p><strong>本质原因是onCameraFrame的回调任务优先级比setTimeout、setInterval等默认任务优先级要高</strong></p>
+<p>onCameraFrame的调用路径： </p>
+<ol>
+<li><p>原生camera的setPreviewCallbackWithBuffer()方法，启动相机预览，每产生一帧都会回调到onPreviewFrame() 方法 </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/13.png" alt="img">                         <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/14.png" alt="img">        onPreviewFrame里面会调用AppBrandCameraPluginLayout.onFrameData(byte[] bArr)，执行小程序的回调逻辑 </p>
+</li>
+<li><p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/15.png" alt="img">        后面的链路会处理帧数据并且通过HandlerThread处理runnable，最终通过evaluateJavascript调用js方法执行小程序的onCamera回调 </p>
+</li>
+</ol>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/16.png" alt="img">        <strong>V8JSRuntimeLooper的线程优先级：</strong></p>
+<p>小程序在前台状态: 优先级为**-2**</p>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/17.png" alt="img">        小程序在后台状态：优先级为<strong>10</strong></p>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/18.png" alt="img">        最终链路是通过Process.<em>setThreadPriority方法设置了<strong>V8JSRuntimeLooper</strong>的优先级</em></p>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/19.png" alt="img">        <strong>验证：查看安卓linux层线程优先级：</strong></p>
+<p>adb shell ps -A | grep [包名]找到小程序进程对应的PID                  <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/20.png" alt="img">        </p>
+<p>打开跳绳页面，adb shell top -H -p PID查看线程优先级                  <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/21.png" alt="img">        关注PR(PRI)和NI两个字段：NI 是优先值，是用户层面的概念， PR是进程的实际优先级， 是给内核(kernel)看(用)的。一般情况下，PR=NI+20, 如果一个进程的优先级PR是18， 那么它的NI(nice)值就是18-20=-2 </p>
+<ul>
+<li>RenderThread是安卓渲染线程优先级为-10 </li>
+<li>JSRuntimeLooper线程的优先级为-2，把小程序切到后台后优先级变为10 </li>
+</ul>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/22.png" alt="img">        </p>
+<p><strong>总结：</strong> </p>
+<p><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/23.jpg" alt="img"></p>
+<p><strong>解决方法：</strong> </p>
+<p>把执行代码放到setTimeout、setInterval、nixtTick…等非高优队列 </p>
+<h3 id="setData"><a href="#setData" class="headerlink" title="setData"></a><strong>setData</strong></h3><p><strong>官方建议:</strong></p>
+<p>1.不要过于频繁调用setData，应考虑将多次setData合并成一次setData调用； </p>
+<p>2.数据通信的性能与数据量正相关，因而如果有一些数据字段不在界面中展示且数据结构比较复杂或包含长字符串，则不应使用setData来设置这些数据； </p>
+<p>3.与界面渲染无关的数据最好不要设置在data中，可以考虑设置在page对象的其他字段下。 </p>
+<p>4.去掉不必要的事件绑定（WXML中的bind和catch），从而减少通信的数据量和次数； </p>
+<p>5.事件绑定时需要传输target和currentTarget的dataset，因而不要在节点的data前缀属性中放置过大的数据 </p>
+<p><strong>setData逻辑层源码定义:</strong>                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/24.png" alt="img">        </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; 源码翻译</span><br><span class="line"></span><br><span class="line">key: &quot;setData&quot;, value: function (data, callback) &#123;</span><br><span class="line"></span><br><span class="line">  var _this &#x3D; this;</span><br><span class="line"></span><br><span class="line">  try &#123;</span><br><span class="line"></span><br><span class="line">      var dataObject &#x3D; k(data);  &#x2F;&#x2F; 转为Object</span><br><span class="line"></span><br><span class="line">      if (&#39;Object&#39; !&#x3D;&#x3D; object) return void D(&#39;类型错误&#39;, &#39;setData accepts an Object rather than some &#39; + dataObject);</span><br><span class="line"></span><br><span class="line">      </span><br><span class="line"></span><br><span class="line">      Object.keys(data).forEach(function (key) &#123;</span><br><span class="line"></span><br><span class="line">        void 0 &#x3D;&#x3D;&#x3D; data[key] &amp;&amp; D(&#39;Page setData warning&#39;, &#39;Setting data field &quot;&#39; + t + &#39;&quot; to undefined is invalid.&#39;);</span><br><span class="line"></span><br><span class="line">        var keyList &#x3D; V(key),  &#x2F;&#x2F; 解析key对象&#x2F;数组</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; n.data：page.data的深拷贝副本</span><br><span class="line"></span><br><span class="line">         var o &#x3D; G(n.data, keyList),   </span><br><span class="line"></span><br><span class="line">         var i &#x3D; o.obj,</span><br><span class="line"></span><br><span class="line">         var a &#x3D; o.key;</span><br><span class="line"></span><br><span class="line">        if ((i &amp;&amp; (i[a] &#x3D; v(data[item])), void 0 !&#x3D;&#x3D; data[key])) &#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F; n.__viewData__：page.data的深拷贝副本</span><br><span class="line"></span><br><span class="line">          var s &#x3D; G(n.__viewData__, keyList),  </span><br><span class="line"></span><br><span class="line">            c &#x3D; s.obj,</span><br><span class="line"></span><br><span class="line">            u &#x3D; s.key;</span><br><span class="line"></span><br><span class="line">          c &amp;&amp; (c[u] &#x3D; v(data[item]));</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">      &#125;),</span><br><span class="line"></span><br><span class="line">        __appServiceSDK__.traceBeginEvent(&#39;Framework&#39;, &#39;DataEmitter::emit&#39;),</span><br><span class="line"></span><br><span class="line">        this.__wxComponentInst__.setData(JSON.parse(JSON.stringify(data)), callback),</span><br><span class="line"></span><br><span class="line">        __appServiceSDK__.traceEndEvent();</span><br><span class="line"></span><br><span class="line">    &#125; catch (e) &#123;</span><br><span class="line"></span><br><span class="line">      M(e);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">k &#x3D; function (data) &#123;</span><br><span class="line"></span><br><span class="line">  return Object.prototype.toString.call(data).split(&quot; &quot;)[1].split(&quot;]&quot;)[0]</span><br><span class="line"></span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 解析Key, 保存对象&#x2F;数组的值。 例如 a.b.c&#x3D;&gt; [a,b,c]、a[0].b&#x3D;&gt;[a,0,b]</span><br><span class="line"></span><br><span class="line">V &#x3D; function (key) &#123;</span><br><span class="line"></span><br><span class="line">        if (&quot;String&quot; !&#x3D;&#x3D; k(e)) throw D(&quot;数据路径错误&quot;, &quot;Path must be a string&quot;), </span><br><span class="line"></span><br><span class="line">        new L(&quot;Path must be a string&quot;);</span><br><span class="line"></span><br><span class="line">        for (var t &#x3D; e.length, n &#x3D; [], r &#x3D; &quot;&quot;, o &#x3D; 0, i &#x3D; !1, a &#x3D; !1, s &#x3D; 0; s &lt; t; s++) &#123;</span><br><span class="line"></span><br><span class="line">            var c &#x3D; e[s];</span><br><span class="line"></span><br><span class="line">            if (&quot;\\&quot; &#x3D;&#x3D;&#x3D; c) s + 1 &lt; t &amp;&amp; (&quot;.&quot; &#x3D;&#x3D;&#x3D; e[s + 1] || &quot;[&quot; &#x3D;&#x3D;&#x3D; e[s + 1] || &quot;]&quot; &#x3D;&#x3D;&#x3D; e[s + 1]) ? (r +&#x3D; e[s + 1], s++) : r +&#x3D; &quot;\\&quot;; else if (&quot;.&quot; &#x3D;&#x3D;&#x3D; c) r &amp;&amp; (n.push(r), r &#x3D; &quot;&quot;); else if (&quot;[&quot; &#x3D;&#x3D;&#x3D; c) &#123;</span><br><span class="line"></span><br><span class="line">                if (r &amp;&amp; (n.push(r), r &#x3D; &quot;&quot;), 0 &#x3D;&#x3D;&#x3D; n.length) throw D(&quot;数据路径错误&quot;, &quot;Path can not start with []: &quot; + e), new L(&quot;Path can not start with []: &quot; + e);</span><br><span class="line"></span><br><span class="line">                a &#x3D; !0, i &#x3D; !1</span><br><span class="line"></span><br><span class="line">            &#125; else if (&quot;]&quot; &#x3D;&#x3D;&#x3D; c) &#123;</span><br><span class="line"></span><br><span class="line">                if (!i) throw D(&quot;数据路径错误&quot;, &quot;Must have number in []: &quot; + e), new L(&quot;Must have number in []: &quot; + e);</span><br><span class="line"></span><br><span class="line">                a &#x3D; !1, n.push(o), o &#x3D; 0</span><br><span class="line"></span><br><span class="line">            &#125; else if (a) &#123;</span><br><span class="line"></span><br><span class="line">                if (c &lt; &quot;0&quot; || c &gt; &quot;9&quot;) throw D(&quot;数据路径错误&quot;, &quot;Only number 0-9 could inside []: &quot; + e), new L(&quot;Only number 0-9 could inside []: &quot; + e);</span><br><span class="line"></span><br><span class="line">                i &#x3D; !0, o &#x3D; 10 * o + c.charCodeAt(0) - 48</span><br><span class="line"></span><br><span class="line">            &#125; else r +&#x3D; c</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        if (r &amp;&amp; n.push(r), 0 &#x3D;&#x3D;&#x3D; n.length) throw D(&quot;数据路径错误&quot;, &quot;Path can not be empty&quot;), new L(&quot;Path can not be empty&quot;);</span><br><span class="line"></span><br><span class="line">        return n</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+<p><strong>一些结论：</strong></p>
+<p>setData是局部刷新，层次比较深的数据结构(a.b.c.d)的改动是通过局部复制=&gt;赋值到全局Data来实现，当仅改动到对象/数组的某一个属性时，不要setData整个对象/数组。 </p>
+<h3 id="nextTick-关于nextTick“下个时间片”是指逻辑层的“下个时间片”还是指等渲染层渲染完的“下个时间片”？"><a href="#nextTick-关于nextTick“下个时间片”是指逻辑层的“下个时间片”还是指等渲染层渲染完的“下个时间片”？" class="headerlink" title="nextTick                          关于nextTick“下个时间片”是指逻辑层的“下个时间片”还是指等渲染层渲染完的“下个时间片”？"></a><strong>nextTick</strong>                  <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/0.png" alt="img">        <a href="https://developers.weixin.qq.com/community/develop/doc/000a02e8fe061847c23aef70151000?highLine=wx.nextTick">关于nextTick“下个时间片”是指逻辑层的“下个时间片”还是指等渲染层渲染完的“下个时间片”？</a></h3><p><strong>nextTick方法源码：</strong></p>
+<ul>
+<li>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/25.png" alt="img">        requestAnimationFrame通常是指VSYNC信号的帧回调，所以nextTick与setTimeout有本质上的区别 </li>
+<li>源码有些地方会利用setTimeout(l, 16)来兜底实现帧回调 </li>
+</ul>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/26.png" alt="img">        </p>
+<p><strong>Canvas.requestAnimationFrame方法实现(安卓)：</strong></p>
+<p><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/27.png" alt="img">        不同平台对应不同的canvas实例和requestAnimationFrame实现 </p>
+<p>老版本的webkit里没有requestAnimationFrame，逻辑层降级方案： </p>
+<p><img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/28.png" alt="img">        vSync逻辑层降级实现 </p>
+<p>​                 <img src="/2023/01/01/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/29.png" alt="img">        </p>
+]]></content>
+  </entry>
 </search>
